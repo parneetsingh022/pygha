@@ -22,6 +22,15 @@ jobs:
       - run: pip install tox
       - run: tox -q -e ${{ matrix.tox-env }}
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          # no token needed for public repos
+          files: coverage.xml
+          flags: ${{ matrix.tox-env }}
+          name: ${{ matrix.tox-env }}
+          fail_ci_if_error: true
+
   lint:
     runs-on: ubuntu-latest
     steps:
