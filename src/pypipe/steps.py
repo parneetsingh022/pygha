@@ -5,12 +5,36 @@ Each class here represents a "real" action that pypipe can run
 or transpile, like executing a shell command or checking out code.
 """
 
-import subprocess
+import shlex, pathlib, subprocess # nosec B404: subprocess is used with argv-only and validated inputs
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List, Set
 
 # Import the abstract base class from our models
 from .models import Step
+
+
+ALLOWED_BINARIES: Set[str] = {
+    "python", "pytest", "tox",
+    "npm", "yarn", "pnpm", "node",
+    "mvn", "gradle", "go", "make",
+    "dotnet", "cargo",
+}
+
+FORBIDDEN_WORDS: Set[str] = {
+    "sudo", "chmod", "chown", "curl", "wget",
+    "ssh", "scp", "nc", "nmap", "telnet", "rm"
+}
+
+def _validate_argv(argv: List[str]) -> None:
+    if not argv:
+        raise ValueError("empty argv")
+    exe = pathlib.Path(argv[0]).name
+    if exe not in ALLOWED_BINARIES:
+        raise ValueError(f"executable '{exe}' not allowed")
+    for tok in argv:
+        base = pathlib.Path(tok).name
+        if base in FORBIDDEN_WORDS:
+            raise ValueError(f"forbidden token '{base}' in args")
 
 
 @dataclass
@@ -38,17 +62,17 @@ class RunShellStep(Step):
         """
         print(f"--- Running step: {self.name}")
         try:
-            # shell=True is a security risk if the command is from
-            # untrusted user input, but for a CI tool, it's
-            # often necessary for complex commands.
-            # 'check=True' will raise an exception on non-zero exit
+            argv = shlex.split(self.command)
+            _validate_argv(argv)
+
             subprocess.run(
-                self.command, 
-                shell=True, 
+                argv, 
+                shell=False, 
                 check=True,
                 text=True, 
                 encoding='utf-8'
-            )
+            ) # nosec B603
+            
         except subprocess.CalledProcessError as e:
             print(f"Step '{self.name}' failed with exit code {e.returncode}")
             raise e # Re-raise to stop the pipeline
