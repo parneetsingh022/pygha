@@ -32,4 +32,14 @@ jobs:
       - run: python -m pip install -U pip
       - run: pip install tox
       - run: tox -q -e lint
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -U pip
+      - run: pip install tox
       - run: tox -q -e typecheck
