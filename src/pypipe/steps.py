@@ -5,7 +5,7 @@ Each class here represents a "real" action that pypipe can run
 or transpile, like executing a shell command or checking out code.
 """
 
-import shlex, pathlib, subprocess # nosec B404: subprocess is used with argv-only and validated inputs
+import shlex, pathlib, subprocess # nosec B404: subprocess is used with argv-only
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, List, Set
 
