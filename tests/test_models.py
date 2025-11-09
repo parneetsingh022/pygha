@@ -27,6 +27,34 @@ class _FakeStep(Step):
     def to_gitlab_dict(self) -> Dict[str, Any]:
         """Mock transpile method."""
         return {"script": f"echo '{self.name}'"}
+    
+
+# --- Tests for Step Base Class ---
+
+def test_step_base_class_raises_not_implemented():
+    """
+    Tests that the abstract methods on the base Step class
+    raise NotImplementedError if they are called directly.
+    """
+    
+    # We can't instantiate 'Step' directly, so we make a
+    # "bad" subclass that inherits from Step but doesn't
+    # implement the abstract methods.
+    class _BadStep(Step):
+        pass
+
+    bad_step = _BadStep(name="test")
+    
+    # Check that calling each method raises the correct error
+    with pytest.raises(NotImplementedError):
+        bad_step.execute(context=None)
+
+    with pytest.raises(NotImplementedError):
+        bad_step.to_github_dict()
+        
+    with pytest.raises(NotImplementedError):
+        bad_step.to_gitlab_dict()
+
 
 
 # --- Tests for Job Object ---
