@@ -139,7 +139,7 @@ class CheckoutStep(Step):
         be a simple 'git clone' script if 'repository' is set.
         """
         if self.repository:
-             return {
+            return {
                 "name": self.name,
                 "script": f"git clone https://gitlab.com/{self.repository}.git"
             }
