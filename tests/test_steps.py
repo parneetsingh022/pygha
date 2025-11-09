@@ -134,3 +134,15 @@ def test_checkoutstep_to_gitlab_dict_without_repo_returns_empty():
     step = CheckoutStep(repository=None, ref=None, name="Checkout code")
     out = step.to_gitlab_dict()
     assert out == {}
+
+def test_checkoutstep_execute_handles_exception(monkeypatch):
+    step = CheckoutStep(repository="user/repo", name="Checkout code")
+
+    # Replace print with something that raises, to simulate a failure
+    def fake_print(*args, **kwargs):
+        raise RuntimeError("simulated failure")
+
+    monkeypatch.setattr("builtins.print", fake_print)
+
+    with pytest.raises(RuntimeError, match="simulated failure"):
+        step.execute(context={})
