@@ -13,30 +13,6 @@ from typing import Any, Dict, Optional, List, Set
 from .models import Step
 
 
-ALLOWED_BINARIES: Set[str] = {
-    "python", "pytest", "tox",
-    "npm", "yarn", "pnpm", "node",
-    "mvn", "gradle", "go", "make",
-    "dotnet", "cargo",
-}
-
-FORBIDDEN_WORDS: Set[str] = {
-    "sudo", "chmod", "chown", "curl", "wget",
-    "ssh", "scp", "nc", "nmap", "telnet", "rm"
-}
-
-def _validate_argv(argv: List[str]) -> None:
-    if not argv:
-        raise ValueError("empty argv")
-    exe = pathlib.Path(argv[0]).name
-    if exe not in ALLOWED_BINARIES:
-        raise ValueError(f"executable '{exe}' not allowed")
-    for tok in argv:
-        base = pathlib.Path(tok).name
-        if base in FORBIDDEN_WORDS:
-            raise ValueError(f"forbidden token '{base}' in args")
-
-
 @dataclass
 class RunShellStep(Step):
     """A step that executes a shell command."""
@@ -63,7 +39,6 @@ class RunShellStep(Step):
         print(f"--- Running step: {self.name}")
         try:
             argv = shlex.split(self.command)
-            _validate_argv(argv)
 
             subprocess.run(
                 argv, 
