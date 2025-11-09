@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pypipe"
+version = "0.1.0"
+description = "A Python-native CI/CD framework for defining, testing, and transpiling pipelines."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+# Keep tox config tiny using legacy_tox_ini so we don't duplicate sections.
+[tool.tox]
+requires = ["tox>=4.18"]
+legacy_tox_ini = """
+[tox]
+envlist = py311,py312,py313,py314,lint
+skip_missing_interpreters = true
+
+[testenv]
+deps = pytest>=8
+commands = pytest
+
+[testenv:lint]
+deps = ruff>=0.6
+commands = ruff check .
+"""
