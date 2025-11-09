@@ -5,10 +5,9 @@ These classes define the "blueprint" of a pipeline.
 They are "dumb" data containers. The logic that runs or
 transpiles them lives in other modules (like runner.py).
 """
-import sys
 from dataclasses import dataclass, field
 from typing import List, Dict, Set, Optional, Any
-import pytest
+from collections import deque
 
 # --- Step Base Class ---
 # We define a simple base class for Step so that the
@@ -107,12 +106,12 @@ class Pipeline:
                 in_degree[name] += 1
         
         # 2. Initialize the queue with all "source" jobs (no dependencies)
-        queue = [name for name in self.jobs if in_degree[name] == 0]
+        queue = deque([name for name in self.jobs if in_degree[name] == 0])
         sorted_names = []
         
         # 3. Process the queue (Kahn's algorithm for topological sort)
         while queue:
-            job_name = queue.pop(0)
+            job_name = queue.popleft()
             sorted_names.append(job_name)
             
             # For each job that depended on the one we just finished...
