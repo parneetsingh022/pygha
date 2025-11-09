@@ -61,13 +61,6 @@ class RunShellStep(Step):
             "name": self.name,
             "run": self.command
         }
-    
-    def to_gitlab_dict(self) -> Dict[str, Any]:
-        """Transpiles to the GitLab CI YAML format."""
-        return {
-            "name": self.name,
-            "script": self.command
-        }
 
 
 @dataclass
@@ -130,17 +123,3 @@ class CheckoutStep(Step):
             github_dict["with"] = with_details
             
         return github_dict
-    
-    def to_gitlab_dict(self) -> Dict[str, Any]:
-        """
-        GitLab checks out code by default.
-        This step might not be needed, or it could
-        be a simple 'git clone' script if 'repository' is set.
-        """
-        if self.repository:
-            return {
-                "name": self.name,
-                "script": f"git clone https://gitlab.com/{self.repository}.git"
-            }
-        
-        return {}

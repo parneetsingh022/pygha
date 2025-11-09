@@ -30,22 +30,22 @@ def test_runshellstep_to_github_dict():
     out = step.to_github_dict()
     assert out == {"name": "Run tests", "run": "pytest -q"}
 
-def test_runshellstep_to_gitlab_dict():
-    step = RunShellStep(command="pytest -q", name="Run tests")
-    out = step.to_gitlab_dict()
-    assert out == {"name": "Run tests", "script": "pytest -q"}
-
 def test_runshellstep_execute_invokes_subprocess_run(monkeypatch):
     recorded = {}
 
-    def fake_run(cmd, shell, check, text, encoding):
-        recorded["args"] = (cmd, shell, check, text, encoding)
+    def fake_run(cmd, **kwargs):
+        recorded["cmd"] = cmd
+        recorded["kwargs"] = kwargs
         return None
 
     monkeypatch.setattr(subprocess, "run", fake_run)
     step = RunShellStep(command="echo hello", name="Say hello")
     step.execute(context={})
-    assert recorded["args"] == ("echo hello", True, True, True, "utf-8")
+    assert recorded["cmd"] == ["echo", "hello"]
+    assert recorded["kwargs"]["shell"] is False
+    assert recorded["kwargs"]["check"] is True
+    assert recorded["kwargs"]["text"] is True
+    assert recorded["kwargs"]["encoding"] == "utf-8"
 
 def test_runshellstep_execute_raises_calledprocesserror(monkeypatch):
     def fake_run(*args, **kwargs):
@@ -122,18 +122,6 @@ def test_checkoutstep_to_github_dict_with_details():
     assert out["uses"] == "actions/checkout@v4"
     assert out["with"] == {"repository": "user/repo", "ref": "main"}
 
-def test_checkoutstep_to_gitlab_dict_with_repo():
-    step = CheckoutStep(repository="user/repo", ref=None, name="Checkout code")
-    out = step.to_gitlab_dict()
-    assert out == {
-        "name": "Checkout code",
-        "script": "git clone https://gitlab.com/user/repo.git",
-    }
-
-def test_checkoutstep_to_gitlab_dict_without_repo_returns_empty():
-    step = CheckoutStep(repository=None, ref=None, name="Checkout code")
-    out = step.to_gitlab_dict()
-    assert out == {}
 
 def test_checkoutstep_execute_handles_exception(monkeypatch):
     step = CheckoutStep(repository="user/repo", name="Checkout code")

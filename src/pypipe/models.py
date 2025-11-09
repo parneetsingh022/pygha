@@ -28,11 +28,6 @@ class Step(ABC):
         """The method the GitHub Transpiler will call."""
         raise NotImplementedError
     
-    @abstractmethod
-    def to_gitlab_dict(self) -> Dict[str, Any]:
-        """The method the GitLab Transpiler will call."""
-        raise NotImplementedError
-    
 
 # --- Job Object ---
 

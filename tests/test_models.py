@@ -24,10 +24,6 @@ class _FakeStep(Step):
         """Mock to_github_dict method. Converts to GitHub Actions format."""
         return {"run": f"echo '{self.name}'"}
     
-    def to_gitlab_dict(self) -> Dict[str, Any]:
-        """Mock to_gitlab_dict method."""
-        return {"script": f"echo '{self.name}'"}
-    
 
 # --- Tests for Job Object ---
 
