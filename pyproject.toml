@@ -9,6 +9,9 @@ description = "A Python-native CI/CD framework for defining, testing, and transp
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
+dependencies = [
+    "ruamel.yaml>=0.18.0",
+]
 
 [tool.pytest.ini_options]
 addopts = "-q"

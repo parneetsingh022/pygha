@@ -19,17 +19,8 @@ class RunShellStep(Step):
     """A step that executes a shell command."""
     
     command: str = field(default="")
+    name: str = field(default="")
     """The shell command to execute (e.g., "pytest")."""
-
-    def __post_init__(self) -> None:
-        """Set a default name if one wasn't provided."""
-        # Only set a default name if the user didn't provide one.
-        if not self.name:
-            # Shorten long commands for the default name
-            if len(self.command) > 40:
-                self.name = f"run: {self.command[:37]}..."
-            else:
-                self.name = f"run: {self.command}"
 
     def execute(self, context: Any) -> None:
         """
@@ -59,11 +50,9 @@ class RunShellStep(Step):
     def to_github_dict(self) -> Dict[str, Any]:
         """Transpiles to the GitHub Actions YAML format."""
         return {
-            "name": self.name,
             "run": self.command
         }
-
-
+        
 @dataclass
 class CheckoutStep(Step):
     """
@@ -78,13 +67,8 @@ class CheckoutStep(Step):
     ref: Optional[str] = None
     """(Optional) The branch, tag, or SHA to checkout."""
 
-    def __post_init__(self) -> None:
-        if not self.name:
-            self.name = "Checkout code"
-
     def execute(self, context: Any) -> None:
         """Runs 'git clone' locally."""
-        print(f"--- Running step: {self.name}")
         
         # This is a simplified implementation.
         # A real one would handle auth, refs, etc.
@@ -101,10 +85,10 @@ class CheckoutStep(Step):
     def to_github_dict(self) -> Dict[str, Any]:
         """Translates to the 'actions/checkout' reusable action."""
         # This step is special in GitHub, it uses 'uses'
-        github_dict : Dict[str, Any] = {
-            "name": self.name,
+        github_dict: Dict[str, Any] = {
             "uses": "actions/checkout@v4"
         }
+
         # Add 'with' block if we have details
         with_details = {}
         if self.repository:
