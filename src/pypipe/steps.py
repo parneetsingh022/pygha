@@ -86,7 +86,7 @@ class CheckoutStep(Step):
     def to_github_dict(self) -> Dict[str, Any]:
         """Translates to the 'actions/checkout' reusable action."""
         # This step is special in GitHub, it uses 'uses'
-        github_dict : Dict[str, Any] = {
+        github_dict: Dict[str, Any] = {
             "uses": "actions/checkout@v4"
         }
 

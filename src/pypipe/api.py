@@ -9,14 +9,14 @@ from .models import Job, Step
 _current_job: ContextVar[Job | None] = ContextVar("_current_job", default=None)
 
 @contextmanager
-def active_job(job : Job) -> Generator[None, None, None]:
+def active_job(job: Job) -> Generator[None, None, None]:
     token = _current_job.set(job)
     try:
         yield
     finally:
         _current_job.reset(token)
 
-def _get_active_job(name : str) -> Job:
+def _get_active_job(name: str) -> Job:
     job = _current_job.get()
     if job is None:
         raise RuntimeError(f"No active job. Call '{name}' inside a @job function during build.")

@@ -24,11 +24,11 @@ def _build_pipeline_basic():
     build_steps = [
         CheckoutStep(),  # no repo/ref so no "with" block
         RunShellStep(command="echo Building project..."),
-        RunShellStep(command="make build", name="make-build"),
+        RunShellStep(command="make build"),
     ]
     test_steps = [
-        RunShellStep(command="echo Running tests...", name="test-echo"),
-        RunShellStep(command="pytest -v", name="pytest"),
+        RunShellStep(command="echo Running tests..."),
+        RunShellStep(command="pytest -v"),
     ]
     build = FakeJob(name="build", steps=build_steps, runner_image=None, depends_on=None)
     test = FakeJob(name="test", steps=test_steps, runner_image=None, depends_on=["build"])
