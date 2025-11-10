@@ -1,10 +1,11 @@
 from ruamel.yaml import YAML
-from typing import Dict, Any, Iterable
+from typing import Dict, Any, Iterable, Optional
 from ..models import Pipeline
+from ..registry import get_default
 
 class GitHubTranspiler:
-    def __init__(self, pipeline: Pipeline):
-        self.pipeline = pipeline
+    def __init__(self, pipeline: Optional[Pipeline] = None):
+        self.pipeline = pipeline if pipeline is not None else get_default()
 
     @staticmethod
     def _sorted_unique(items: Iterable[str]) -> list[str]:

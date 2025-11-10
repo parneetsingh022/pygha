@@ -42,13 +42,11 @@ def test_job_decorator_checkout_params(assert_matches_golden):
     Single 'build' job that checks out a specific repo/ref,
     ensuring the 'with:' block is present.
     """
-    pipeline_name = _unique_pipeline_name("golden-checkout")
 
-    @job(name="build", pipeline=pipeline_name)
+    @job(name="build")
     def build_job():
         checkout(repository="octocat/hello-world", ref="main")
 
-    pipeline = register_pipeline(pipeline_name)
-    out = GitHubTranspiler(pipeline).to_yaml()
+    out = GitHubTranspiler().to_yaml()
 
     assert_matches_golden(out, "job_checkout.yml")
