@@ -1,10 +1,4 @@
 import textwrap
-import pytest
-
-# Adjust these imports to your package layout if needed.
-# Assuming:
-#   src/pypipe/transpilers/github.py  -> GitHubTranspiler
-#   src/pypipe/steps.py               -> RunShellStep, CheckoutStep
 from pypipe.transpilers.github import GitHubTranspiler
 from pypipe.steps import RunShellStep, CheckoutStep
 
