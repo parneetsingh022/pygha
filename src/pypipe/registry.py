@@ -10,7 +10,7 @@ def get_default() -> Pipeline:
 def get_pipeline(name: str) -> Pipeline:
     return _pipelines[name]
 
-def register_pipeline(name: str):
+def register_pipeline(name: str) -> Pipeline:
     if name not in _pipelines:
         _pipelines[name] = Pipeline()
     return _pipelines[name]
