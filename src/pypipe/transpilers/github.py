@@ -20,7 +20,7 @@ class GitHubTranspiler:
             }
 
             # Add 'needs' before 'steps'
-            if getattr(job, "depends_on", None):
+            if job.depends_on:
                 deps = self._sorted_unique(job.depends_on)
                 job_dict["needs"] = deps
 
