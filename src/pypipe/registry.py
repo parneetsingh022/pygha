@@ -13,7 +13,7 @@ from typing import Dict
 from .models import Pipeline
 
 # Global registry of pipelines
-_pipelines: Dict[str, Pipeline] = {"default": Pipeline()}
+_pipelines: Dict[str, Pipeline] = {"default": Pipeline(name='ci')}
 
 
 def get_default() -> Pipeline:
@@ -53,5 +53,5 @@ def register_pipeline(name: str) -> Pipeline:
         Pipeline: The registered (new or existing) pipeline instance.
     """
     if name not in _pipelines:
-        _pipelines[name] = Pipeline()
+        _pipelines[name] = Pipeline(name=name)
     return _pipelines[name]

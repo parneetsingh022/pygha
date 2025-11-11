@@ -64,7 +64,7 @@ class Pipeline:
     This object holds all the Job objects and contains the logic
     to resolve their execution order.
     """
-    
+    name : str
     jobs: Dict[str, Job] = field(default_factory=dict)
     """A dictionary mapping job names to the Job objects."""
 
@@ -93,7 +93,7 @@ class Pipeline:
         in_degree: Dict[str, int] = {name: 0 for name in self.jobs}
         
         for name, job in self.jobs.items():
-            for dep_name in job.depends_on:
+            for dep_name in (job.depends_on or []):
                 # Check for invalid dependencies
                 if dep_name not in self.jobs:
                     raise ValueError(

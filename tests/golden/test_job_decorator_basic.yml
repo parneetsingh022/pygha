@@ -1,4 +1,4 @@
-name: CI
+name: test_job_decorator_basic
 on:
   - push
   - pull_request

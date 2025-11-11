@@ -1,6 +1,7 @@
 import textwrap
 from pypipe.transpilers.github import GitHubTranspiler
 from pypipe.steps import RunShellStep, CheckoutStep
+from pypipe.models import Pipeline
 
 
 # --- Minimal fakes for Pipeline/Job ---
@@ -12,12 +13,6 @@ class FakeJob:
         self.runner_image = runner_image
         self.depends_on = depends_on
 
-class FakePipeline:
-    def __init__(self, jobs_in_order):
-        self._jobs = jobs_in_order
-
-    def get_job_order(self):
-        return list(self._jobs)
 
 
 def _build_pipeline_basic():
@@ -32,7 +27,11 @@ def _build_pipeline_basic():
     ]
     build = FakeJob(name="build", steps=build_steps, runner_image=None, depends_on=None)
     test = FakeJob(name="test", steps=test_steps, runner_image=None, depends_on=["build"])
-    return FakePipeline([build, test])
+    pipeline = Pipeline(name='CI')
+    pipeline.add_job(build)
+    pipeline.add_job(test)
+
+    return pipeline
 
 
 def _build_pipeline_with_checkout_params():
@@ -40,7 +39,10 @@ def _build_pipeline_with_checkout_params():
         CheckoutStep(repository="octocat/hello-world", ref="main"),
     ]
     build = FakeJob(name="build", steps=build_steps)
-    return FakePipeline([build])
+    pipeline = Pipeline(name='CI')
+    pipeline.add_job(build)
+
+    return pipeline
 
 
 # --- Tests ---

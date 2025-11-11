@@ -20,12 +20,20 @@ jobs:
           python-version: ${{ matrix.tox-env == 'py311' && '3.11' || matrix.tox-env == 'py312' && '3.12' || matrix.tox-env == 'py313' && '3.13' || '3.14' }}
       - run: python -m pip install -U pip
       - run: pip install tox
-      - run: tox -q -e ${{ matrix.tox-env }}
+
+      - name: Run tests
+        run: tox -q -e ${{ matrix.tox-env }}
+        env:
+          COVERAGE_FILE: .coverage.${{ matrix.tox-env }}
+
+      - name: Generate coverage.xml
+        run: |
+          python -m pip install -U coverage
+          python -m coverage xml -i -o coverage.xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          # no token needed for public repos
           files: coverage.xml
           flags: ${{ matrix.tox-env }}
           name: ${{ matrix.tox-env }}

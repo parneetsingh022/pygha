@@ -1,12 +1,8 @@
-import uuid
 from pypipe.decorators import job
 from pypipe.api import shell, checkout
 from pypipe.transpilers.github import GitHubTranspiler
 from pypipe.registry import register_pipeline
 
-
-def _unique_pipeline_name(prefix: str) -> str:
-    return f"{prefix}-{uuid.uuid4()}"
 
 
 def test_job_decorator_basic(assert_matches_golden):
@@ -16,7 +12,7 @@ def test_job_decorator_basic(assert_matches_golden):
       test  -> needs build, two shell runs
     Compare transpiled YAML to the golden.
     """
-    pipeline_name = _unique_pipeline_name("golden-basic")
+    pipeline_name = 'test_job_decorator_basic'
 
     @job(name="build", pipeline=pipeline_name)
     def build_job():
@@ -34,7 +30,7 @@ def test_job_decorator_basic(assert_matches_golden):
     # transpile to YAML (ruamel.yaml pretty indent expected)
     out = GitHubTranspiler(pipeline).to_yaml()
 
-    assert_matches_golden(out, "job_basic.yml")
+    assert_matches_golden(out, "test_job_decorator_basic.yml")
 
 
 def test_job_decorator_checkout_params(assert_matches_golden):
@@ -43,10 +39,10 @@ def test_job_decorator_checkout_params(assert_matches_golden):
     ensuring the 'with:' block is present.
     """
 
-    @job(name="build")
+    @job(name="build") # no pipeline name given, uses default pipeline 'ci'
     def build_job():
         checkout(repository="octocat/hello-world", ref="main")
 
     out = GitHubTranspiler().to_yaml()
 
-    assert_matches_golden(out, "job_checkout.yml")
+    assert_matches_golden(out, "test_job_decorator_checkout_params.yml")

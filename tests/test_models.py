@@ -83,12 +83,12 @@ def test_job_add_step_method():
 
 def test_pipeline_initialization():
     """Tests that a new Pipeline is created with no jobs."""
-    pipe = Pipeline()
+    pipe = Pipeline(name='test_pipeline_initialization')
     assert pipe.jobs == {}
 
 def test_pipeline_add_job():
     """Tests that the add_job method correctly adds a job."""
-    pipe = Pipeline()
+    pipe = Pipeline(name='test_pipeline_add_job')
     job_build = Job(name="build")
     
     pipe.add_job(job_build)
@@ -97,7 +97,7 @@ def test_pipeline_add_job():
 
 def test_pipeline_add_duplicate_job_raises_error():
     """Tests that adding a job with a duplicate name raises a ValueError."""
-    pipe = Pipeline()
+    pipe = Pipeline(name='test_pipeline_add_duplicate_job_raises_error')
     job1 = Job(name="build")
     job2 = Job(name="build") # A different object, but same name
     
@@ -108,7 +108,7 @@ def test_pipeline_add_duplicate_job_raises_error():
 
 def test_pipeline_get_job_order_simple():
     """Tests a simple, no-dependency list of jobs."""
-    pipe = Pipeline()
+    pipe = Pipeline(name='test_pipeline_get_job_order_simple')
     job_build = Job(name="build")
     job_test = Job(name="test")
     
@@ -125,7 +125,7 @@ def test_pipeline_get_job_order_simple():
 
 def test_pipeline_get_job_order_linear_dependency():
     """Tests a simple chain (A -> B -> C)."""
-    pipe = Pipeline()
+    pipe = Pipeline(name='test_pipeline_get_job_order_linear_dependency')
     job_a = Job(name="build")
     job_b = Job(name="test", depends_on={"build"})
     job_c = Job(name="deploy", depends_on={"test"})
@@ -141,7 +141,7 @@ def test_pipeline_get_job_order_linear_dependency():
 
 def test_pipeline_get_job_order_fan_in_dependency():
     """Tests a "fan-in" graph (A and B -> C)."""
-    pipe = Pipeline()
+    pipe = Pipeline(name='test_pipeline_get_job_order_fan_in_dependency')
     job_a = Job(name="test-lint")
     job_b = Job(name="test-unit")
     job_c = Job(name="deploy", depends_on={"test-lint", "test-unit"})
@@ -160,7 +160,7 @@ def test_pipeline_get_job_order_fan_in_dependency():
 
 def test_pipeline_get_job_order_invalid_dependency_raises_error():
     """Tests that a non-existent dependency raises a ValueError."""
-    pipe = Pipeline()
+    pipe = Pipeline(name='test_pipeline_get_job_order_invalid_dependency_raises_error')
     job_a = Job(name="test", depends_on={"build"}) # "build" does not exist
     
     pipe.add_job(job_a)
@@ -170,7 +170,7 @@ def test_pipeline_get_job_order_invalid_dependency_raises_error():
 
 def test_pipeline_get_job_order_circular_dependency_raises_error():
     """Tests that a circular dependency (A -> B -> A) raises a ValueError."""
-    pipe = Pipeline()
+    pipe = Pipeline(name='test_pipeline_get_job_order_circular_dependency_raises_error')
     job_a = Job(name="build", depends_on={"test"})
     job_b = Job(name="test", depends_on={"build"})
     

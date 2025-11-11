@@ -31,7 +31,7 @@ class GitHubTranspiler:
             jobs_dict[job.name] = job_dict
 
         workflow = {
-            "name": "CI",
+            "name": self.pipeline.name,
             "on": ["push", "pull_request"],
             "jobs": jobs_dict,
         }

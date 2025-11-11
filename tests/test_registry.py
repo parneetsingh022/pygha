@@ -17,7 +17,7 @@ def fresh_registry(monkeypatch):
     # Reload registry to ensure module-level side effects are reset (optional).
     importlib.reload(registry)
 
-    monkeypatch.setattr(registry, "_pipelines", {"default": Pipeline()})
+    monkeypatch.setattr(registry, "_pipelines", {"default": Pipeline(name='ci')})
     yield
 
 

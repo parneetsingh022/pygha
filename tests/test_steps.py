@@ -21,7 +21,7 @@ def _build_pipeline_basic() -> Pipeline:
     build = Job(name="build", steps=build_steps)
     test = Job(name="test", steps=test_steps, depends_on={"build"})
 
-    pipe = Pipeline()
+    pipe = Pipeline(name='CI')
     pipe.add_job(build)
     pipe.add_job(test)
     return pipe
@@ -33,7 +33,7 @@ def _build_pipeline_with_checkout_params() -> Pipeline:
     ]
     build = Job(name="build", steps=build_steps)
 
-    pipe = Pipeline()
+    pipe = Pipeline(name='CI')
     pipe.add_job(build)
     return pipe
 
