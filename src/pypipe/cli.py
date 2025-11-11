@@ -3,15 +3,20 @@ import re
 import stat
 import runpy
 from pathlib import Path
+from typing import Dict, Optional, Set, List
+from re import Pattern
+
 from pypipe.transpilers.github import GitHubTranspiler
 from pypipe import registry
+from pypipe.models import Pipeline  # adjust path if your Pipeline lives elsewhere
 
 # Match variations like:
 # "# pypipe: keep", "#pypipe: keep", "#pypipe : keep", any spacing/case
-KEEP_REGEX = re.compile(r'^\s*#\s*pypipe\s*:\s*keep\s*$', re.IGNORECASE)
+KEEP_REGEX: Pattern[str] = re.compile(r'^\s*#\s*pypipe\s*:\s*keep\s*$', re.IGNORECASE)
 
-def _get_pipelines_dict():
+def _get_pipelines_dict() -> Dict[str, Pipeline]:
     if hasattr(registry, "_pipelines") and isinstance(registry._pipelines, dict):
+        # mypy: Registry is Dict[str, Pipeline]
         return registry._pipelines
     raise RuntimeError("No _pipelines found in pypipe.registry")
 
@@ -35,7 +40,6 @@ def _safe_unlink(path: Path) -> bool:
         path.unlink()
         return True
     except PermissionError:
-        # Try to relax permissions and retry (helps on Windows)
         try:
             os.chmod(path, stat.S_IWUSR | stat.S_IRUSR)  # owner read/write
             path.unlink()
@@ -47,7 +51,7 @@ def _safe_unlink(path: Path) -> bool:
     except Exception:
         return False
 
-def _clean_orphaned(out_dir: Path, valid_names: set[str]) -> None:
+def _clean_orphaned(out_dir: Path, valid_names: Set[str]) -> None:
     """Remove .yml files not in valid_names unless they have the keep marker."""
     for f in out_dir.glob("*.yml"):
         if f.stem in valid_names:
@@ -58,10 +62,7 @@ def _clean_orphaned(out_dir: Path, valid_names: set[str]) -> None:
         if _safe_unlink(f):
             print(f"\033[91m[PyPipe] Removed {f} (not in registry)\033[0m")
         else:
-            # Don’t fail the run—just warn
             print(f"\033[93m[PyPipe] Warning: could not remove {f} (permissions?)\033[0m")
-
-
 
 def cmd_build(src_dir: str = ".pipe", out_dir: str = ".github/workflows", clean: bool = False) -> int:
     SRC_DIR = Path(src_dir)
@@ -74,7 +75,7 @@ def cmd_build(src_dir: str = ".pipe", out_dir: str = ".github/workflows", clean:
         print(f"[PyPipe] Running {f}...")
         runpy.run_path(str(f))
 
-    pipelines = _get_pipelines_dict()
+    pipelines: Dict[str, Pipeline] = _get_pipelines_dict()
     if not pipelines:
         print("[PyPipe] No pipelines registered.")
         return 0
@@ -90,7 +91,7 @@ def cmd_build(src_dir: str = ".pipe", out_dir: str = ".github/workflows", clean:
     print(f"\n✨ Done. {len(pipelines)} workflows written.")
     return 0
 
-def main(argv=None) -> int:
+def main(argv: Optional[List[str]] = None) -> int:
     import argparse
     parser = argparse.ArgumentParser(prog="pypipe", description="PyPipe CLI")
     sub = parser.add_subparsers(dest="command", required=True)
