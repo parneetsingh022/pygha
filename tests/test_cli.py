@@ -184,3 +184,39 @@ def test_clean_skips_files_with_unreadable_head(tmp_path, monkeypatch, fake_tran
             os.chmod(orphan, 0o644)
         except FileNotFoundError:
             pass
+
+
+def test_build_deduplicates_double_matched_files(tmp_path, monkeypatch, capsys, fake_transpiler):
+    """
+    Ensure a file matching both 'pipeline_*.py' and '*_pipeline.py' is only run once.
+    """
+    src_dir = tmp_path / ".pipe"
+    out_dir = tmp_path / ".github" / "workflows"
+    src_dir.mkdir(parents=True)
+    out_dir.mkdir(parents=True)
+
+    # This filename matches BOTH patterns
+    fname = "pipeline_x_pipeline.py"
+    write(src_dir / fname, "print('x')")
+
+    calls = []
+
+    def fake_run_path(path):
+        calls.append(path)
+        if path.endswith(fname):
+            registry._pipelines["x"] = FakePipeline("x")
+
+    monkeypatch.setattr("runpy.run_path", fake_run_path)
+
+    rc = cli_main(["build", "--src-dir", str(src_dir), "--out-dir", str(out_dir)])
+    assert rc == 0
+
+    # It should have been discovered and executed exactly once
+    assert sum(p.endswith(fname) for p in calls) == 1
+
+    # CLI output should reflect 1 found file (not 2)
+    out = capsys.readouterr().out
+    assert "Found 1 pipeline files" in out
+
+    # Output must be written correctly once
+    assert (out_dir / "x.yml").read_text(encoding="utf-8") == "name: x\njobs: {}\n"

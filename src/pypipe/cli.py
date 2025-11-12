@@ -69,7 +69,7 @@ def cmd_build(src_dir: str = ".pipe", out_dir: str = ".github/workflows", clean:
     OUT_DIR = Path(out_dir)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    files = sorted(SRC_DIR.glob("pipeline_*.py")) + sorted(SRC_DIR.glob("*_pipeline.py"))
+    files = sorted(set(SRC_DIR.glob("pipeline_*.py")) | set(SRC_DIR.glob("*_pipeline.py")))
     print(f"[PyPipe] Found {len(files)} pipeline files:")
     for f in files:
         print(f"[PyPipe] Running {f}...")
