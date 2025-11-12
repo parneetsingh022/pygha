@@ -82,7 +82,7 @@ def cmd_build(src_dir: str = ".pipe", out_dir: str = ".github/workflows", clean:
 
     for name, pipe in pipelines.items():
         out_path = OUT_DIR / f"{name}.yml"
-        out_path.write_text(GitHubTranspiler(pipe).to_yaml())
+        out_path.write_text(GitHubTranspiler(pipe).to_yaml(), encoding="utf-8")
         print(f"[PyPipe] Wrote {out_path}")
 
     if clean:
