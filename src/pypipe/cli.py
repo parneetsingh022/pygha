@@ -12,7 +12,7 @@ from pypipe.models import Pipeline  # adjust path if your Pipeline lives elsewhe
 
 # Match variations like:
 # "# pypipe: keep", "#pypipe: keep", "#pypipe : keep", any spacing/case
-KEEP_REGEX: Pattern[str] = re.compile(r'^\s*#\s*pypipe\s*:\s*keep\s*$', re.IGNORECASE)
+KEEP_REGEX: Pattern[str] = re.compile(r'^#\s*pypipe\s*:\s*keep$', re.IGNORECASE)
 
 def _get_pipelines_dict() -> Dict[str, Pipeline]:
     if hasattr(registry, "_pipelines") and isinstance(registry._pipelines, dict):
