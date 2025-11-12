@@ -170,6 +170,8 @@ def test_clean_skips_files_with_unreadable_head(tmp_path, monkeypatch, fake_tran
     try:
         os.chmod(orphan, 0)  # no perms on POSIX; may noop on Windows
     except PermissionError:
+        # On some platforms (e.g., Windows), chmod may not restrict permissions as expected.
+        # It's safe to ignore this error for the purposes of this test.
         pass
 
     try:
@@ -183,6 +185,7 @@ def test_clean_skips_files_with_unreadable_head(tmp_path, monkeypatch, fake_tran
         try:
             os.chmod(orphan, 0o644)
         except FileNotFoundError:
+            # File may have already been deleted; safe to ignore during cleanup.
             pass
 
 

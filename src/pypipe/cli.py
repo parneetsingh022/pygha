@@ -8,7 +8,7 @@ from re import Pattern
 
 from pypipe.transpilers.github import GitHubTranspiler
 from pypipe import registry
-from pypipe.models import Pipeline  # adjust path if your Pipeline lives elsewhere
+from pypipe.models import Pipeline
 
 # Match variations like:
 # "# pypipe: keep", "#pypipe: keep", "#pypipe : keep", any spacing/case
