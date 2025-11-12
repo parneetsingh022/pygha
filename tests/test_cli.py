@@ -378,3 +378,22 @@ def test_safe_unlink_other_exception_returns_false(tmp_path, monkeypatch):
     monkeypatch.setattr(Path, "unlink", fake_unlink, raising=True)
 
     assert _safe_unlink(target) is False
+
+
+def test_clean_orphaned_warns_when_unlink_fails(tmp_path, monkeypatch, capsys):
+    from pypipe.cli import _clean_orphaned
+
+    out_dir = tmp_path
+    orphan = out_dir / "orphan.yml"
+    orphan.write_text("name: orphan\n", encoding="utf-8")  # no keep marker
+
+    # Force the deletion helper to "fail" so the warning path executes
+    monkeypatch.setattr("pypipe.cli._safe_unlink", lambda p: False)
+
+    _clean_orphaned(out_dir, valid_names=set())
+
+    out = capsys.readouterr().out
+    # Assert the yellow warning with ANSI codes and filename is printed
+    assert f"\033[93m[PyPipe] Warning: could not remove {orphan} (permissions?)\033[0m" in out
+    # And the file was not removed
+    assert orphan.exists()
