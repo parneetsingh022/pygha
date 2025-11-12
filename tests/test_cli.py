@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import pytest
 from types import SimpleNamespace
+import runpy
 
 
 from pypipe import registry
@@ -443,3 +444,23 @@ def test_main_returns_zero_for_unknown_command(monkeypatch):
 
     # Assert: falls through to the final `return 0`
     assert rc == 0
+
+def test_dunder_main_propagates_exit_code(monkeypatch):
+    # Make cli.main return a sentinel so we can assert SystemExit.code
+    import pypipe.cli as cli
+    monkeypatch.setattr(cli, "main", lambda *a, **k: 123)
+
+    with pytest.raises(SystemExit) as exc:
+        runpy.run_module("pypipe.__main__", run_name="__main__", alter_sys=True)
+
+    assert exc.value.code == 123
+
+
+def test_dunder_main_handles_nonzero_exit(monkeypatch):
+    import pypipe.cli as cli
+    monkeypatch.setattr(cli, "main", lambda *a, **k: 2)
+
+    with pytest.raises(SystemExit) as exc:
+        runpy.run_module("pypipe.__main__", run_name="__main__", alter_sys=True)
+
+    assert exc.value.code == 2
