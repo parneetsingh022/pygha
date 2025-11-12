@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 import pytest
+from types import SimpleNamespace
+
 
 from pypipe import registry
 from pypipe.cli import main as cli_main
@@ -397,3 +399,47 @@ def test_clean_orphaned_warns_when_unlink_fails(tmp_path, monkeypatch, capsys):
     assert f"\033[93m[PyPipe] Warning: could not remove {orphan} (permissions?)\033[0m" in out
     # And the file was not removed
     assert orphan.exists()
+
+
+
+def test_main_dispatches_to_cmd_build(monkeypatch, tmp_path):
+    # Arrange: patch cmd_build to capture args and return a sentinel code
+    from pypipe.cli import main as cli_main
+    import pypipe.cli as cli
+
+    called = {}
+    def fake_cmd_build(src_dir, out_dir, clean):
+        called.update({"src_dir": src_dir, "out_dir": out_dir, "clean": clean})
+        return 123  # sentinel
+
+    monkeypatch.setattr(cli, "cmd_build", fake_cmd_build)
+
+    # Act
+    rc = cli_main(["build", "--src-dir", str(tmp_path/"s"), "--out-dir", str(tmp_path/"o"), "--clean"])
+
+    # Assert: dispatch & args wired correctly, return code propagated
+    assert rc == 123
+    assert called == {
+        "src_dir": str(tmp_path/"s"),
+        "out_dir": str(tmp_path/"o"),
+        "clean": True,
+    }
+
+
+def test_main_returns_zero_for_unknown_command(monkeypatch):
+    # Arrange: bypass argparse parsing to simulate a non-"build" command
+    from pypipe.cli import main as cli_main
+    import argparse
+
+    monkeypatch.setattr(
+        argparse.ArgumentParser,
+        "parse_args",
+        lambda self, argv=None: SimpleNamespace(command="something-else"),
+        raising=True,
+    )
+
+    # Act
+    rc = cli_main([])  # argv ignored by our patch
+
+    # Assert: falls through to the final `return 0`
+    assert rc == 0
