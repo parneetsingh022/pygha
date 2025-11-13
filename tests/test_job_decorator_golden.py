@@ -1,7 +1,13 @@
+import pytest
 from pypipe import job, pipeline, default_pipeline
 from pypipe.steps import shell, checkout
 from pypipe.transpilers.github import GitHubTranspiler
-from pypipe.registry import register_pipeline
+from pypipe.registry import register_pipeline, reset_registry
+
+
+@pytest.fixture(autouse=True)
+def reset_pipeline_registry():
+    reset_registry()
 
 
 
