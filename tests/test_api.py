@@ -1,8 +1,9 @@
 import pytest
 
-from pypipe.api import active_job, shell, checkout
+from pypipe.steps import shell, checkout
+from pypipe.steps.api import active_job
 from pypipe.models import Job
-from pypipe.steps import RunShellStep, CheckoutStep
+from pypipe.steps.builtin import RunShellStep, CheckoutStep
 
 
 def test_shell_appends_step_and_returns_it():

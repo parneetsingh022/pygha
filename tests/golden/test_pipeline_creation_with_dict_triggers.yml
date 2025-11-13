@@ -1,0 +1,17 @@
+name: test_pipeline_creation_with_dict_triggers
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - src/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - src/**
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install pypipe

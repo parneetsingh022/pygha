@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, Optional
 
 # Import the abstract base class from our models
-from .models import Step
+from pypipe.models import Step
 
 
 @dataclass

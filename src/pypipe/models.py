@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Set, Optional, Any
 from collections import deque
 from abc import ABC, abstractmethod
+from .trigger_event import PipelineSettings
 
 # --- Step Base Class ---
 # We define a simple base class for Step so that the
@@ -67,6 +68,8 @@ class Pipeline:
     name : str
     jobs: Dict[str, Job] = field(default_factory=dict)
     """A dictionary mapping job names to the Job objects."""
+
+    pipeline_settings: PipelineSettings = field(default_factory=PipelineSettings)
 
     def add_job(self, job: Job) -> None:
         """Registers a new job with the pipeline."""

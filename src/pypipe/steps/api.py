@@ -3,8 +3,8 @@ from contextlib import contextmanager
 from typing import Generator, Optional
 from contextvars import ContextVar
 
-from .steps import RunShellStep, CheckoutStep
-from .models import Job, Step
+from .builtin import RunShellStep, CheckoutStep
+from pypipe.models import Job, Step
 
 _current_job: ContextVar[Job | None] = ContextVar("_current_job", default=None)
 

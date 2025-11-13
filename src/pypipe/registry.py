@@ -9,8 +9,10 @@ Notes:
     - The default pipeline is always available under the name "default".
 """
 
-from typing import Dict
+from typing import Dict, Unpack
 from .models import Pipeline
+from .trigger_event import PipelineSettings, PipelineSettingsKwargs
+from dataclasses import fields
 
 # Global registry of pipelines
 _pipelines: Dict[str, Pipeline] = {"ci": Pipeline(name='ci')}
@@ -55,3 +57,40 @@ def register_pipeline(name: str) -> Pipeline:
     if name not in _pipelines:
         _pipelines[name] = Pipeline(name=name)
     return _pipelines[name]
+
+
+def pipeline(name: str, **kwargs: Unpack[PipelineSettingsKwargs]) -> Pipeline:
+    """
+    Get, create, or configure a pipeline's settings.
+
+    Keyword options:
+      - on_push: str | list[str] | dict | True | None
+      - on_pull_request: str | list[str] | dict | True | None
+    """
+    pipe_instance = register_pipeline(name)
+
+    # --- Optional runtime guard for unknown keys (clearer errors) ---
+    allowed = {f.name for f in fields(PipelineSettings)}
+    unknown = set(kwargs).difference(allowed)
+    if unknown:
+        ks = ", ".join(sorted(unknown))
+        raise TypeError(f"Unknown keyword argument(s): {ks}. "
+                        f"Allowed: {', '.join(sorted(allowed))}")
+
+    new_settings = PipelineSettings(**kwargs)
+    pipe_instance.pipeline_settings = new_settings
+    return pipe_instance
+
+def default_pipeline(**kwargs: Unpack[PipelineSettingsKwargs]) -> Pipeline:
+    return pipeline(name="ci", **kwargs)
+
+
+def reset_registry() -> None:
+    """Reset the global pipeline registry to its initial state.
+
+    This clears all registered pipelines and recreates the default 'ci' pipeline.
+    Useful for ensuring test isolation between runs.
+    """
+    global _pipelines
+    _pipelines.clear()
+    _pipelines["ci"] = Pipeline(name="ci")

@@ -1,7 +1,13 @@
-from pypipe.decorators import job
-from pypipe.api import shell, checkout
+import pytest
+from pypipe import job, pipeline, default_pipeline
+from pypipe.steps import shell, checkout
 from pypipe.transpilers.github import GitHubTranspiler
-from pypipe.registry import register_pipeline
+from pypipe.registry import register_pipeline, reset_registry
+
+
+@pytest.fixture(autouse=True)
+def reset_pipeline_registry():
+    reset_registry()
 
 
 
@@ -26,9 +32,9 @@ def test_job_decorator_basic(assert_matches_golden):
         shell("pytest -v")
 
     # retrieve the pipeline we decorated into
-    pipeline = register_pipeline(pipeline_name)
+    pipeline_obj = register_pipeline(pipeline_name)
     # transpile to YAML (ruamel.yaml pretty indent expected)
-    out = GitHubTranspiler(pipeline).to_yaml()
+    out = GitHubTranspiler(pipeline_obj).to_yaml()
 
     assert_matches_golden(out, "test_job_decorator_basic.yml")
 
@@ -46,3 +52,141 @@ def test_job_decorator_checkout_params(assert_matches_golden):
     out = GitHubTranspiler().to_yaml()
 
     assert_matches_golden(out, "test_job_decorator_checkout_params.yml")
+
+
+def test_default_pipeline_creation_with_push_and_pr(assert_matches_golden):
+    default_pipeline(
+        on_push=['main', 'dev'],
+        on_pull_request=['test1', 'test2']
+    )
+
+
+    @job(name='initial')
+    def initial_job():
+        shell('echo "Hello world!"')
+
+
+    out = GitHubTranspiler().to_yaml()
+
+    assert_matches_golden(out, "test_default_pipeline_creation_with_push_and_pr.yml")
+
+def test_pipeline_creation_with_push(assert_matches_golden):
+    mypipe = pipeline(
+        name = 'test_pipeline_creation_with_push',
+        on_push='main',
+    )
+
+
+    @job(name='build', pipeline=mypipe)
+    def initial_job():
+        shell('pip install pypipe')
+
+
+    out = GitHubTranspiler(mypipe).to_yaml()
+
+    assert_matches_golden(out, "test_pipeline_creation_with_push.yml")
+
+
+def test_pipeline_creation_with_pr(assert_matches_golden):
+    mypipe = pipeline(
+        name = 'test_pipeline_creation_with_pr',
+        on_pull_request='main',
+    )
+
+
+    @job(name='build', pipeline=mypipe)
+    def initial_job():
+        shell('pip install pypipe')
+
+
+    out = GitHubTranspiler(mypipe).to_yaml()
+
+    assert_matches_golden(out, "test_pipeline_creation_with_pr.yml")
+
+
+def test_pipeline_creation_with_bool(assert_matches_golden):
+    mypipe = pipeline(
+        name = 'test_pipeline_creation_with_bool',
+        on_push=True,
+        on_pull_request=True,
+    )
+
+
+    @job(name='build', pipeline=mypipe)
+    def initial_job():
+        shell('pip install pypipe')
+
+
+    out = GitHubTranspiler(mypipe).to_yaml()
+
+    assert_matches_golden(out, "test_pipeline_creation_with_bool.yml")
+
+
+def test_pipeline_creation_with_dict_triggers(assert_matches_golden):
+    mypipe = pipeline(
+        name='test_pipeline_creation_with_dict_triggers',
+        on_push={"branches": ["main"], "paths": ["src/**"]},
+        on_pull_request={"branches": ["main"], "paths": ["src/**"]},
+    )
+
+    @job(name='build', pipeline=mypipe)
+    def build_job():
+        shell('pip install pypipe')
+
+    out = GitHubTranspiler(mypipe).to_yaml()
+    assert_matches_golden(out, "test_pipeline_creation_with_dict_triggers.yml")
+
+def test_pipeline_default_when_no_triggers(assert_matches_golden):
+    mypipe = pipeline(name='test_pipeline_default_when_no_triggers')
+
+    @job(name='build', pipeline=mypipe)
+    def build_job():
+        shell('pip install pypipe')
+
+    out = GitHubTranspiler(mypipe).to_yaml()
+    assert_matches_golden(out, "test_pipeline_default_when_no_triggers.yml")
+
+
+def test_pipeline_disable_push_with_empty_list(assert_matches_golden):
+    mypipe = pipeline(
+        name='test_pipeline_disable_push_with_empty_list',
+        on_push=[],                      # disables push
+        on_pull_request='main',          # keep PR
+    )
+
+    @job(name='build', pipeline=mypipe)
+    def build_job():
+        shell('pip install pypipe')
+
+    out = GitHubTranspiler(mypipe).to_yaml()
+    assert_matches_golden(out, "test_pipeline_disable_push_with_empty_list.yml")
+
+
+def test_pipeline_invalid_trigger_type_raises():
+    mypipe = pipeline(
+        name='test_pipeline_invalid_trigger_type_raises',
+        on_push=123,  # invalid
+    )
+
+    @job(name='build', pipeline=mypipe)
+    def build_job():
+        pass
+
+    with pytest.raises(TypeError):
+        GitHubTranspiler(mypipe).to_yaml()
+
+
+def test_pipeline_mixed_dict_and_string(assert_matches_golden):
+    mypipe = pipeline(
+        name='test_pipeline_mixed_dict_and_string',
+        on_push={"branches": ["main"], "paths": ["src/**"]},
+        on_pull_request='main',
+    )
+
+    @job(name='build', pipeline=mypipe)
+    def build_job():
+        shell('pip install pypipe')
+
+    out = GitHubTranspiler(mypipe).to_yaml()
+    assert_matches_golden(out, "test_pipeline_mixed_dict_and_string.yml")
+

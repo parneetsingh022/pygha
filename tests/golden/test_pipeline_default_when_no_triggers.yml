@@ -1,0 +1,10 @@
+name: test_pipeline_default_when_no_triggers
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install pypipe

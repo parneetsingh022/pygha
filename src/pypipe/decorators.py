@@ -2,7 +2,7 @@
 from typing import Optional, List, Callable, TypeVar
 from .models import Job, Pipeline
 from .registry import get_default, register_pipeline
-from .api import active_job
+from .steps.api import active_job
 
 R = TypeVar("R")
 

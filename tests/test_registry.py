@@ -4,6 +4,7 @@ import pytest
 
 from pypipe import registry
 from pypipe.models import Pipeline, Job
+from pypipe import pipeline, default_pipeline
 
 
 @pytest.fixture(autouse=True)
@@ -78,3 +79,11 @@ def test_default_pipeline_is_stable_object():
     d1 = registry.get_default()
     d2 = registry.get_default()
     assert d1 is d2
+
+def test_unknown_kwargs_in_pipeline_raises_type_error():
+    """Ensure that unexpected kwargs raise TypeError for both pipeline functions."""
+    with pytest.raises(TypeError):
+        pipeline(on_push=True, on_pull_request=True, wrong_arg=True)
+
+    with pytest.raises(TypeError):
+        default_pipeline(on_push=True, on_pull_request=True, wrong_arg=True)

@@ -1,6 +1,6 @@
 import textwrap
 from pypipe.transpilers.github import GitHubTranspiler
-from pypipe.steps import RunShellStep, CheckoutStep
+from pypipe.steps.builtin import RunShellStep, CheckoutStep
 from pypipe.models import Pipeline
 
 
@@ -60,7 +60,6 @@ def test_to_dict_structure_with_real_steps():
     # Top level
     assert wf["name"] == "CI"
     assert isinstance(wf["on"], dict)
-    assert set(wf["on"].keys()) == {"push", "pull_request"}
     assert set(wf["jobs"].keys()) == {"build", "test"}
 
     # Build job
@@ -111,9 +110,6 @@ def test_to_yaml_pretty_and_key_order():
 
     out = tr.to_yaml().replace("\r\n", "\n")
 
-    # on: should be unquoted, and items should be indented
-    assert "\non:\n  push:\n  pull_request:\n" in out
-
     # 'needs' appears before 'steps' in 'test' job block
     test_block_start = out.find("\n  test:\n")
     assert test_block_start != -1
@@ -126,7 +122,8 @@ def test_to_yaml_pretty_and_key_order():
         name: CI
         on:
           push:
-          pull_request:
+            branches:
+              - main
         jobs:
           build:
             runs-on: ubuntu-latest

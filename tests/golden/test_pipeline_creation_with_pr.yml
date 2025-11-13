@@ -1,0 +1,10 @@
+name: test_pipeline_creation_with_pr
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install pypipe
