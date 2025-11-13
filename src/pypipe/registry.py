@@ -66,7 +66,7 @@ def pipeline(name: str, **kwargs: Any) -> Pipeline:
     options like 'on_push' or 'on_pull_request'.
 
     Args:
-        name (str): The name of the pipeline (defaults to "ci").
+        name (str): The name of the pipeline.
         **kwargs: Any valid arguments for the PipelineSettings
                   dataclass (e.g., on_push="main", on_pull_request=True).
     
