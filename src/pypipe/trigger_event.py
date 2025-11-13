@@ -46,7 +46,10 @@ class PipelineSettings:
         if config is None or config is False:
             return None
 
-        raise TypeError(f"Invalid config type for a trigger: {config}")
+        raise TypeError(
+            f"Invalid config type for a trigger: {type(config).__name__}. "
+            f"Expected str, list, dict, bool, or None, got {config!r}"
+        )
 
     def to_dict(self) -> Dict[str, Any]:
         """
