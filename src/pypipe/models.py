@@ -69,7 +69,7 @@ class Pipeline:
     jobs: Dict[str, Job] = field(default_factory=dict)
     """A dictionary mapping job names to the Job objects."""
 
-    pipeline_settings = PipelineSettings()
+    pipeline_settings: PipelineSettings = field(default_factory=PipelineSettings)
 
     def add_job(self, job: Job) -> None:
         """Registers a new job with the pipeline."""
