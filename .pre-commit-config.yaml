@@ -1,0 +1,69 @@
+# .pre-commit-config.yaml
+# Runs quick hygiene + formatting on commit,
+# and your existing tox lint/typecheck on push.
+
+minimum_pre_commit_version: "3.5.0"
+repos:
+  # --- Generic hygiene ---
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=2000"]
+
+  # --- Keep code modern for 3.11+ matrix ---
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.17.0
+    hooks:
+      - id: pyupgrade
+        args: ["--py311-plus"]
+
+  # --- Ruff formatter + linter (fast) ---
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.3
+    hooks:
+      - id: ruff-format
+      - id: ruff
+        args:
+          # fail on fixable issues in CI; locally it will autofix but fail the hook to allow review of changes
+          - "--fix"
+          - "--exit-non-zero-on-fix"
+        # If you have tests/fixtures with odd code, you can ignore them in pyproject.toml instead.
+        types_or: [python]
+
+  # --- Run your existing tox envs on push (slower) ---
+  - repo: local
+    hooks:
+      - id: tox-lint
+        name: tox -e lint
+        entry: tox -q -e lint
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: tox-typecheck
+        name: tox -e typecheck
+        entry: tox -q -e typecheck
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+# Global excludes to avoid touching generated stuff
+exclude: |
+  (?x)^(
+    docs/_build/|
+    build/|
+    dist/|
+    .*\.egg-info/|
+    .*/migrations/|
+    .*/node_modules/|
+    .*/.venv/|
+    .*/venv/
+  )
