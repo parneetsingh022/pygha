@@ -32,7 +32,7 @@ repos:
       - id: ruff-format
       - id: ruff
         args:
-          # fail on fixable issues in CI; locally it will autofix
+          # fail on fixable issues in CI; locally it will autofix but fail the hook to allow review of changes
           - "--fix"
           - "--exit-non-zero-on-fix"
         # If you have tests/fixtures with odd code, you can ignore them in pyproject.toml instead.
@@ -46,14 +46,14 @@ repos:
         entry: tox -q -e lint
         language: system
         pass_filenames: false
-        stages: [push]
+        stages: [pre-push]
 
       - id: tox-typecheck
         name: tox -e typecheck
         entry: tox -q -e typecheck
         language: system
         pass_filenames: false
-        stages: [push]
+        stages: [pre-push]
 
 # Global excludes to avoid touching generated stuff
 exclude: |
