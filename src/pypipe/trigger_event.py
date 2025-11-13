@@ -35,7 +35,8 @@ class PipelineSettings:
         # Case 3: User passed True (just enable it)
         # e.g., on_push=True
         if config is True:
-            return {} # Empty dict means "run on all"
+            from .transpilers.github import _Blank
+            return _Blank() # Empty "run on all"
 
         # Case 4: User passed a full dict (power user)
         # e.g., on_push={"branches": ["main"], "paths": ["src/**"]}

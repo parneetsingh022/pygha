@@ -1,9 +1,22 @@
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
+from ruamel.yaml.representer import RoundTripRepresenter
 
 from typing import Dict, Any, Iterable, Optional
 from ..models import Pipeline
 from ..registry import get_default
+
+class _Blank:  # sentinel to mean "emit nothing after ':'"
+    pass
+
+yaml12 = YAML()
+yaml12.indent(mapping=2, sequence=4, offset=2)
+yaml12.default_flow_style = False
+
+# represent _Blank as an empty scalar (no text), i.e. `key:`
+yaml12.representer.add_representer(
+    _Blank, lambda rep, _: rep.represent_scalar('tag:yaml.org,2002:null', '')
+)
 
 class GitHubTranspiler:
     def __init__(self, pipeline: Optional[Pipeline] = None):
