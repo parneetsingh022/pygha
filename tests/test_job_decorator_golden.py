@@ -135,3 +135,14 @@ def test_pipeline_creation_with_dict_triggers(assert_matches_golden):
 
     out = GitHubTranspiler(mypipe).to_yaml()
     assert_matches_golden(out, "test_pipeline_creation_with_dict_triggers.yml")
+
+def test_pipeline_default_when_no_triggers(assert_matches_golden):
+    mypipe = pipeline(name='test_pipeline_default_when_no_triggers')
+
+    @job(name='build', pipeline=mypipe)
+    def build_job():
+        shell('pip install pypipe')
+
+    out = GitHubTranspiler(mypipe).to_yaml()
+    assert_matches_golden(out, "test_pipeline_default_when_no_triggers.yml")
+
