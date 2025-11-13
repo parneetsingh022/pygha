@@ -72,8 +72,3 @@ class PipelineSettings:
             on_section["push"] = {"branches": ["main"]}
         
         return on_section
-    
-
-if __name__ == "__main__":
-    settings = PipelineSettings(on_push='main', on_pull_request={"branches": ['main'], 'path': "docs/*"})
-    print(settings.to_dict())
