@@ -1,5 +1,12 @@
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
+from typing import Any, Dict, List, Optional, Union,  TypedDict
+
+Trigger = Union[str, List[str], Dict[str, Any], bool, None]
+
+class PipelineSettingsKwargs(TypedDict, total=False):
+    on_push: Trigger
+    on_pull_request: Trigger
 
 @dataclass
 class PipelineSettings:
@@ -7,10 +14,8 @@ class PipelineSettings:
     Settings for a pipeline. Designed to be serializable to/from JSON.
     """
 
-    name: Optional[str] = None
-    
-    on_push: Any = None
-    on_pull_request: Any = None
+    on_push: Trigger = None
+    on_pull_request: Trigger = None
 
 
     def _transpile_trigger(self, config: Any) -> Optional[Dict[str, Any]]:

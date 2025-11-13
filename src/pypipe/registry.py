@@ -9,9 +9,10 @@ Notes:
     - The default pipeline is always available under the name "default".
 """
 
-from typing import Dict, Any
+from typing import Dict, Unpack
 from .models import Pipeline
-from .trigger_event import PipelineSettings
+from .trigger_event import PipelineSettings, PipelineSettingsKwargs
+from dataclasses import fields
 
 # Global registry of pipelines
 _pipelines: Dict[str, Pipeline] = {"ci": Pipeline(name='ci')}
@@ -58,38 +59,30 @@ def register_pipeline(name: str) -> Pipeline:
     return _pipelines[name]
 
 
-def pipeline(name: str, **kwargs: Any) -> Pipeline:
+def pipeline(name: str, **kwargs: Unpack[PipelineSettingsKwargs]) -> Pipeline:
     """
     Get, create, or configure a pipeline's settings.
 
-    This is the main user-facing function for setting pipeline-level
-    options like 'on_push' or 'on_pull_request'.
-
-    Args:
-        name (str): The name of the pipeline.
-        **kwargs: Any valid arguments for the PipelineSettings
-                  dataclass (e.g., on_push="main", on_pull_request=True).
-    
-    Returns:
-        Pipeline: The configured pipeline instance.
+    Keyword options:
+      - on_push: str | list[str] | dict | True | None
+      - on_pull_request: str | list[str] | dict | True | None
     """
-    # 1. Get-or-create the pipeline object using your existing function
     pipe_instance = register_pipeline(name)
-    
-    # 2. Create a new settings object from all the user's kwargs
-    #    The 'name' from PipelineSettings is for the YAML, not the key.
-    if 'name' not in kwargs:
-        kwargs['name'] = pipe_instance.name
+
+    # --- Optional runtime guard for unknown keys (clearer errors) ---
+    allowed = {f.name for f in fields(PipelineSettings)}
+    unknown = set(kwargs).difference(allowed)
+    if unknown:
+        ks = ", ".join(sorted(unknown))
+        raise TypeError(f"Unknown keyword argument(s): {ks}. "
+                        f"Allowed: {', '.join(sorted(allowed))}")
 
     new_settings = PipelineSettings(**kwargs)
-    
-    # 3. Overwrite the pipeline's default settings with the new ones
     pipe_instance.pipeline_settings = new_settings
-    
     return pipe_instance
 
-def default_pipeline(**kwargs: Any) -> Pipeline:
-    return pipeline(name='ci', **kwargs)
+def default_pipeline(**kwargs: Unpack[PipelineSettingsKwargs]) -> Pipeline:
+    return pipeline(name="ci", **kwargs)
 
 
 def reset_registry() -> None:
