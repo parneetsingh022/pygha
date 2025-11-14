@@ -1,4 +1,4 @@
-<h1 align="center">🧩 pypipe</h1>
+<h1 align="center">🧩 PyPipe</h1>
 
 <p align="center">
   <em>A Python-native CI/CD framework for defining, testing, and transpiling pipelines to GitHub Actions.</em>
@@ -22,10 +22,52 @@
 </p>
 
 ---
+## Example: Define a CI Pipeline with `pypipe`
 
-## 💡 Overview
+Below is an example of a **Python-defined pipeline** that mirrors what most teams use in production —  
+build, lint, test, coverage, and deploy — all orchestrated through `pypipe`.
 
-`pypipe` provides a declarative way to manage complex CI/CD pipelines using pure Python — no YAML wrangling required.  
-Define once, deploy anywhere.
+```python
+from pypipe import job, default_pipeline
+from pypipe.steps import shell, checkout, upload_artifact, download_artifact
+
+# Define a default pipeline that triggers on pushes to main and dev,
+# and on pull requests to main.
+default = default_pipeline(
+    on_push=['main', 'dev'],
+    on_pull_request='main'
+)
+
+@job(name='lint')
+def lint():
+    """Static analysis and style checks."""
+    checkout()
+    shell('pip install -U pip ruff mypy')
+    shell('ruff check .')
+    shell('mypy src')
+
+@job(name='build', depends_on=['lint'])
+def build():
+    """Build the package and upload the wheel."""
+    checkout()
+    shell('pip install -U build')
+    shell('python -m build')
+    upload_artifact('dist/', name='build-artifacts')
+
+@job(name='test', depends_on=['build'])
+def test():
+    """Run unit tests with coverage."""
+    checkout()
+    download_artifact('build-artifacts', path='dist/')
+    shell('pip install -e .[dev]')
+    shell('pytest --cov=src --cov-report=xml')
+
+@job(name='deploy', depends_on=['test'])
+def deploy():
+    """Deploy to PyPI when pushing a tagged release."""
+    checkout()
+    shell('pip install twine')
+    shell('if [[ "$GITHUB_REF" == refs/tags/* ]]; then twine upload dist/*; fi')
+```
 
 ---
