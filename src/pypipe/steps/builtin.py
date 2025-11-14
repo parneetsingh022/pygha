@@ -21,8 +21,6 @@ class RunShellStep(Step):
     command: str = field(default="")
     """The shell command to execute (e.g., "pytest")."""
 
-    name: str = field(default="")
-
     def execute(self, context: Any) -> None:
         """
         Executes the shell command using subprocess.
@@ -66,8 +64,6 @@ class CheckoutStep(Step):
 
     ref: str | None = None
     """(Optional) The branch, tag, or SHA to checkout."""
-
-    name: str = field(default="")
 
     def execute(self, context: Any) -> None:
         """Runs 'git clone' locally."""
