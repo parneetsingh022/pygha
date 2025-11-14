@@ -1,6 +1,5 @@
 # api.py
 from contextlib import contextmanager
-
 from collections.abc import Generator
 from contextvars import ContextVar
 
@@ -26,20 +25,18 @@ def _get_active_job(name: str) -> Job:
     return job
 
 
-def shell(command: str) -> Step:
+def shell(command: str, name: str = "") -> Step:
     job = _get_active_job("shell")
-    job.add_step(RunShellStep(command=command))
+    job.add_step(RunShellStep(command=command, name=name))
     return job.steps[-1]
 
 
-def checkout(repository: str | None = None, ref: str | None = None) -> Step:
+def checkout(repository: str | None = None, ref: str | None = None, name: str = "") -> Step:
     job = _get_active_job("checkout")
-    job.add_step(CheckoutStep(repository=repository, ref=ref))
+    job.add_step(CheckoutStep(repository=repository, ref=ref, name=name))
     return job.steps[-1]
 
 
-def echo(message: str) -> Step:
+def echo(message: str, name: str = "") -> Step:
     command = f'echo "{message}"'
-    job = _get_active_job("shell")
-    job.add_step(RunShellStep(command=command))
-    return job.steps[-1]
+    return shell(command, name=name)

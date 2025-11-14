@@ -1,8 +1,12 @@
 import textwrap
+import subprocess
 
 from pypipe.transpilers.github import GitHubTranspiler
 from pypipe.steps.builtin import RunShellStep, CheckoutStep
 from pypipe.models import Job, Pipeline
+import pytest
+
+from pypipe.steps import shell, checkout, echo, active_job
 
 
 def _build_pipeline_basic() -> Pipeline:
@@ -21,7 +25,7 @@ def _build_pipeline_basic() -> Pipeline:
     build = Job(name="build", steps=build_steps)
     test = Job(name="test", steps=test_steps, depends_on={"build"})
 
-    pipe = Pipeline(name='CI')
+    pipe = Pipeline(name="CI")
     pipe.add_job(build)
     pipe.add_job(test)
     return pipe
@@ -33,7 +37,7 @@ def _build_pipeline_with_checkout_params() -> Pipeline:
     ]
     build = Job(name="build", steps=build_steps)
 
-    pipe = Pipeline(name='CI')
+    pipe = Pipeline(name="CI")
     pipe.add_job(build)
     return pipe
 
@@ -139,3 +143,148 @@ def test_to_yaml_pretty_and_key_order():
 
     # Bonus: ensure no 'name:' appears anywhere in YAML
     assert "\n      - name:" not in out
+
+
+######################## Run Shell Step ######################
+
+
+def test_shell_basic_to_github_dict():
+    s = RunShellStep(command="pytest -v")
+    assert s.to_github_dict() == {"run": "pytest -v"}
+
+
+def test_shell_named_to_github_dict():
+    s = RunShellStep(command="pytest -v", name="Run tests")
+    assert s.to_github_dict() == {"name": "Run tests", "run": "pytest -v"}
+
+
+def test_shell_execute_runs_subprocess(monkeypatch):
+    called = {}
+
+    def fake_run(argv, **kwargs):
+        called["argv"] = argv
+        return subprocess.CompletedProcess(argv, 0)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    step = RunShellStep(command="echo hello")
+    step.execute(context=None)
+
+    assert called["argv"] == ["echo", "hello"]
+
+
+def test_shell_execute_raises_on_failure(monkeypatch):
+    def fake_run(argv, **kwargs):
+        raise subprocess.CalledProcessError(returncode=1, cmd=argv)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    step = RunShellStep(command="exit 1", name="Failing")
+    with pytest.raises(subprocess.CalledProcessError):
+        step.execute(context=None)
+
+
+######################## Checkout step ######################
+def test_checkout_basic_to_github_dict():
+    c = CheckoutStep()
+    assert c.to_github_dict() == {"uses": "actions/checkout@v4"}
+
+
+def test_checkout_named_to_github_dict():
+    c = CheckoutStep(name="Checkout repo")
+    assert c.to_github_dict() == {"name": "Checkout repo", "uses": "actions/checkout@v4"}
+
+
+def test_checkout_with_repository():
+    c = CheckoutStep(repository="octocat/hello-world")
+    assert c.to_github_dict() == {
+        "uses": "actions/checkout@v4",
+        "with": {"repository": "octocat/hello-world"},
+    }
+
+
+def test_checkout_with_repository_ref_name():
+    c = CheckoutStep(repository="octocat/hello-world", ref="dev", name="Checkout dev branch")
+    assert c.to_github_dict() == {
+        "name": "Checkout dev branch",
+        "uses": "actions/checkout@v4",
+        "with": {"repository": "octocat/hello-world", "ref": "dev"},
+    }
+
+
+def test_checkout_execute_prints(monkeypatch, capsys):
+    c = CheckoutStep(repository="octocat/hello-world")
+    c.execute(context=None)
+    out = capsys.readouterr().out
+    assert "git clone https://github.com/octocat/hello-world.git" in out
+
+
+############################ echo step ######################
+def test_echo_basic(monkeypatch):
+    # mock active job
+    job = Job(name="build")
+
+    with active_job(job):
+        step = echo("Hello world")
+
+    assert step.command == 'echo "Hello world"'
+    assert step.name == ""
+
+
+def test_echo_named(monkeypatch):
+    job = Job(name="build")
+
+    with active_job(job):
+        step = echo("Hello world", name="Say hello")
+
+    assert step.to_github_dict() == {"name": "Say hello", "run": 'echo "Hello world"'}
+
+
+def test_api_shell_requires_active_job():
+    with pytest.raises(RuntimeError):
+        shell("echo hi")
+
+
+def test_api_checkout_requires_active_job():
+    with pytest.raises(RuntimeError):
+        checkout()
+
+
+def test_api_shell_adds_step_and_returns_it():
+    job = Job(name="build")
+    with active_job(job):
+        step = shell("echo hi")
+    assert step is job.steps[-1]
+    assert step.command == "echo hi"
+    # name should be empty string if not provided via API
+    assert step.name == ""
+    assert step.to_github_dict() == {"run": "echo hi"}
+
+
+def test_api_shell_with_name_and_empty_name_behavior():
+    job = Job(name="build")
+    with active_job(job):
+        s1 = shell("echo hi", name="Say hi")
+        s2 = shell("echo bye", name="")  # empty string
+    assert s1.to_github_dict() == {"name": "Say hi", "run": "echo hi"}
+    # empty string should be omitted by to_github_dict (falsy)
+    assert s2.to_github_dict() == {"run": "echo bye"}
+
+
+def test_api_checkout_adds_step_and_returns_it_basic():
+    job = Job(name="build")
+    with active_job(job):
+        step = checkout()
+    assert step is job.steps[-1]
+    assert step.to_github_dict() == {"uses": "actions/checkout@v4"}
+
+
+def test_api_checkout_with_params_and_name():
+    job = Job(name="build")
+    with active_job(job):
+        step = checkout(repository="octocat/hello-world", ref="main", name="Checkout with name")
+    assert step.to_github_dict() == {
+        "name": "Checkout with name",
+        "uses": "actions/checkout@v4",
+        "with": {"repository": "octocat/hello-world", "ref": "main"},
+    }

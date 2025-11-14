@@ -30,6 +30,12 @@ def test_job_decorator_basic(assert_matches_golden):
         echo("Running tests...")
         shell("pytest -v")
 
+    @job(name="with-name", pipeline=pipeline_name)
+    def with_name():
+        checkout(name="Checkout with name")
+        shell("python with_name.py", name="Run Python Script")
+        echo("This is echo test with name", name="Echo name test")
+
     # retrieve the pipeline we decorated into
     pipeline_obj = register_pipeline(pipeline_name)
     # transpile to YAML (ruamel.yaml pretty indent expected)
