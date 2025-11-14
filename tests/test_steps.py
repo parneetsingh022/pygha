@@ -230,7 +230,7 @@ def test_echo_basic(monkeypatch):
         step = echo("Hello world")
 
     assert step.command == 'echo "Hello world"'
-    assert step.name is None
+    assert step.name == ""
 
 
 def test_echo_named(monkeypatch):
@@ -259,7 +259,7 @@ def test_api_shell_adds_step_and_returns_it():
     assert step is job.steps[-1]
     assert step.command == "echo hi"
     # name should be None if not provided via API
-    assert step.name is None
+    assert step.name == ""
     assert step.to_github_dict() == {"run": "echo hi"}
 
 

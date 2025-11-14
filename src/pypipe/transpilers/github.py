@@ -1,12 +1,17 @@
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-from typing import Dict, Any, Iterable, Optional
+from typing import Any
+
+from collections.abc import Mapping, MutableMapping
+
+from collections.abc import Iterable
 from ..models import Pipeline
 from ..registry import get_default
 
+
 class GitHubTranspiler:
-    def __init__(self, pipeline: Optional[Pipeline] = None):
+    def __init__(self, pipeline: Pipeline | None = None):
         self.pipeline = pipeline if pipeline is not None else get_default()
 
     @staticmethod
@@ -14,11 +19,11 @@ class GitHubTranspiler:
         # Ensure deterministic, duplicate-free 'needs'
         return sorted(set(items))
 
-    def to_dict(self) -> Dict[str, Any]:
-        jobs_dict: Dict[str, Any] = {}
+    def to_dict(self) -> Mapping[str, Any]:
+        jobs_dict: dict[str, Any] = {}
 
         for job in self.pipeline.get_job_order():
-            job_dict: Dict[str, Any] = {
+            job_dict: dict[str, Any] = {
                 "runs-on": job.runner_image or "ubuntu-latest",
             }
 
@@ -32,7 +37,7 @@ class GitHubTranspiler:
 
             jobs_dict[job.name] = job_dict
 
-        workflow = CommentedMap()
+        workflow: MutableMapping[str, Any] = CommentedMap()
         workflow["name"] = self.pipeline.name
         workflow["on"] = self.pipeline.pipeline_settings.to_dict()
         workflow["jobs"] = jobs_dict
@@ -45,6 +50,7 @@ class GitHubTranspiler:
         yaml12.default_flow_style = False
 
         from io import StringIO
+
         buffer = StringIO()
         yaml12.dump(self.to_dict(), buffer)
         return buffer.getvalue()
