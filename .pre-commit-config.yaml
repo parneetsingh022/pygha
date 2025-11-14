@@ -71,6 +71,17 @@ repos:
         types_or: [python]
         pass_filenames: false
 
+  # --- mypy static type checking ---
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0  # pin to a specific mypy version
+    hooks:
+      - id: mypy
+        name: mypy (src)
+        args:
+          - --config-file=pyproject.toml
+          - src
+        pass_filenames: false
+
 # Global excludes to avoid touching generated stuff
 exclude: |
   (?x)^(
