@@ -69,6 +69,7 @@ repos:
           - "-c"
           - "pyproject.toml"
         types_or: [python]
+        pass_filenames: false
 
 # Global excludes to avoid touching generated stuff
 exclude: |

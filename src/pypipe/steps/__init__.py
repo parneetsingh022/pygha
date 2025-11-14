@@ -1,6 +1,7 @@
-from .api import shell, checkout
+from .api import shell, checkout, echo
 
 __all__ = [
-    'shell',
-    'checkout'
+    "shell",
+    "checkout",
+    "echo",
 ]
