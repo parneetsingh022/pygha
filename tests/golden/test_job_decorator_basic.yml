@@ -8,12 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: echo Building project...
+      - run: echo "Building project..."
       - run: make build
   test:
     runs-on: ubuntu-latest
     needs:
       - build
     steps:
-      - run: echo Running tests...
+      - run: echo "Running tests..."
       - run: pytest -v
