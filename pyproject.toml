@@ -13,6 +13,11 @@ dependencies = [
     "ruamel.yaml>=0.18.0",
 ]
 
+[project.optional-dependencies]
+docs = [
+    "sphinx"
+]
+
 [project.scripts]
 pypipe = "pypipe.cli:main"
 
