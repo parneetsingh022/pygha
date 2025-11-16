@@ -1,4 +1,6 @@
-<h1 align="center">🧩 PyPipe</h1>
+<div align="center">
+  <img alt="logo_pypipe_dark" src="https://github.com/user-attachments/assets/89e9f3c9-0184-41ee-9643-f0621e114d67" />
+</div>
 
 <p align="center">
   <em>A Python-native CI/CD framework for defining, testing, and transpiling pipelines to GitHub Actions.</em>
