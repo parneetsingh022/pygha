@@ -1,5 +1,5 @@
 <div align="center">
-  <img alt="logo_pypipe_dark" src="https://github.com/user-attachments/assets/89e9f3c9-0184-41ee-9643-f0621e114d67" />
+  <a href="https://github.com/parneetsingh022/pypipe"><img alt="logo_pypipe_dark" width="300px" src="https://github.com/user-attachments/assets/89e9f3c9-0184-41ee-9643-f0621e114d67" /></a>
 </div>
 
 <p align="center">
