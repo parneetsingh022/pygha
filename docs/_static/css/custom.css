@@ -1,0 +1,3 @@
+div.sphinxsidebar h1.logo {
+  display: none; /* hides the name below the logo */
+}
