@@ -1,0 +1,38 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+  # Allows you to run this manually from the Actions tab for testing
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    # These permissions are mandatory for Trusted Publishing
+    permissions:
+      id-token: write  # IMPORTANT: Required for requesting the OIDC JWT
+      contents: read   # Required for checking out code
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Build Tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+
+      - name: Build Package
+        run: python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
