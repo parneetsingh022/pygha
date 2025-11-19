@@ -13,6 +13,15 @@
 ---
 
 <p align="center">
+  <a href="https://pypi.org/project/pygha/">
+    <img src="https://img.shields.io/pypi/v/pygha?color=blue" alt="PyPI">
+  </a>
+  <a href="https://anaconda.org/psidhu22/pygha">
+    <img src="https://img.shields.io/conda/vn/psidhu22/pygha?color=green&label=anaconda" alt="Conda Version">
+  </a>
+  <a href="https://pypi.org/project/pygha/">
+    <img src="https://img.shields.io/pypi/pyversions/pygha" alt="Python Versions">
+  </a>
   <a href="https://github.com/parneetsingh022/pygha/actions/workflows/ci.yml">
     <img src="https://github.com/parneetsingh022/pygha/actions/workflows/ci.yml/badge.svg" alt="CI Status">
   </a>
@@ -31,6 +40,22 @@
 </p>
 
 ---
+
+## Installation
+
+### PyPI
+You can install `pygha` via pip:
+```bash
+pip install pygha
+```
+
+### Conda
+You can install pygha from the psidhu22 channel:
+```bash
+conda install -c psidhu22 pygha
+```
+
+
 ## Example: Define a CI Pipeline with `pygha`
 
 Below is an example of a **Python-defined pipeline** that mirrors what most teams use in production —  
