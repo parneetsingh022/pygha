@@ -1,7 +1,7 @@
-pypipe documentation
+pygha documentation
 ====================
 
-PyPipe is a lightweight way to describe GitHub Actions workflows with
+pygha is a lightweight way to describe GitHub Actions workflows with
 plain Python functions and decorators.  You declare jobs with the
 ``@job`` decorator, populate them with high level steps, then hand the
 entire pipeline to a transpiler that emits reproducible YAML.

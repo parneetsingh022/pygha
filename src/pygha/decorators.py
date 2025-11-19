@@ -1,21 +1,25 @@
 # decorators.py
-from typing import Optional, List, Callable, TypeVar
+from typing import TypeVar
+
+from collections.abc import Callable
 from .models import Job, Pipeline
 from .registry import get_default, register_pipeline
 from .steps.api import active_job
 
 R = TypeVar("R")
 
+
 def job(
-    name: Optional[str] = None,
-    depends_on: Optional[List[str]] = None,
-    pipeline: Optional[str | Pipeline] = None,
-    runs_on: Optional[str] = "ubuntu-latest",
+    name: str | None = None,
+    depends_on: list[str] | None = None,
+    pipeline: str | Pipeline | None = None,
+    runs_on: str | None = "ubuntu-latest",
 ) -> Callable[[Callable[[], R]], Callable[[], R]]:
     """Decorator to define a job (expects a no-arg function)."""
+
     def wrapper(func: Callable[[], R]) -> Callable[[], R]:
         jname = name or func.__name__
-        
+
         if pipeline is None:
             pipe = get_default()
         elif isinstance(pipeline, Pipeline):
@@ -24,7 +28,6 @@ def job(
             pipe = register_pipeline(pipeline)  # your get-or-create
         else:
             raise TypeError("pipeline must be None, a str, or a Pipeline")
-
 
         job_obj = Job(
             name=jname,

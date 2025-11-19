@@ -1,5 +1,5 @@
 """
-Core data models for pypipe.
+Core data models for pygha.
 
 These classes define the "blueprint" of a pipeline.
 They are "dumb" data containers. The logic that runs or
@@ -88,7 +88,7 @@ class Pipeline:
         """
         Calculates the correct execution order for all jobs.
 
-        This is the "brain" of pypipe. It performs a topological sort
+        This is the "brain" of pygha. It performs a topological sort
         on the job graph and detects circular dependencies.
 
         Returns:

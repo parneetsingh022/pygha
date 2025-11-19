@@ -1,10 +1,11 @@
 import textwrap
-from pypipe.transpilers.github import GitHubTranspiler
-from pypipe.steps.builtin import RunShellStep, CheckoutStep
-from pypipe.models import Pipeline
+from pygha.transpilers.github import GitHubTranspiler
+from pygha.steps.builtin import RunShellStep, CheckoutStep
+from pygha.models import Pipeline
 
 
 # --- Minimal fakes for Pipeline/Job ---
+
 
 class FakeJob:
     def __init__(self, name, steps, runner_image=None, depends_on=None):
@@ -12,7 +13,6 @@ class FakeJob:
         self.steps = steps
         self.runner_image = runner_image
         self.depends_on = depends_on
-
 
 
 def _build_pipeline_basic():
@@ -27,7 +27,7 @@ def _build_pipeline_basic():
     ]
     build = FakeJob(name="build", steps=build_steps, runner_image=None, depends_on=None)
     test = FakeJob(name="test", steps=test_steps, runner_image=None, depends_on=["build"])
-    pipeline = Pipeline(name='CI')
+    pipeline = Pipeline(name="CI")
     pipeline.add_job(build)
     pipeline.add_job(test)
 
@@ -39,13 +39,14 @@ def _build_pipeline_with_checkout_params():
         CheckoutStep(repository="octocat/hello-world", ref="main"),
     ]
     build = FakeJob(name="build", steps=build_steps)
-    pipeline = Pipeline(name='CI')
+    pipeline = Pipeline(name="CI")
     pipeline.add_job(build)
 
     return pipeline
 
 
 # --- Tests ---
+
 
 def test_sorted_unique():
     # Sanity check on helper

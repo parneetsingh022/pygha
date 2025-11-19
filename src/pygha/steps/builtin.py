@@ -1,7 +1,7 @@
 """
 This file contains the concrete implementations of the abstract 'Step' class.
 
-Each class here represents a "real" action that pypipe can run
+Each class here represents a "real" action that pygha can run
 or transpile, like executing a shell command or checking out code.
 """
 
@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 # Import the abstract base class from our models
-from pypipe.models import Step
+from pygha.models import Step
 
 
 @dataclass

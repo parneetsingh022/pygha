@@ -2,9 +2,9 @@
 import importlib
 import pytest
 
-from pypipe import registry
-from pypipe.models import Pipeline, Job
-from pypipe import pipeline, default_pipeline
+from pygha import registry
+from pygha.models import Pipeline, Job
+from pygha import pipeline, default_pipeline
 
 
 @pytest.fixture(autouse=True)
@@ -18,7 +18,7 @@ def fresh_registry(monkeypatch):
     # Reload registry to ensure module-level side effects are reset (optional).
     importlib.reload(registry)
 
-    monkeypatch.setattr(registry, "_pipelines", {"default": Pipeline(name='ci')})
+    monkeypatch.setattr(registry, "_pipelines", {"default": Pipeline(name="ci")})
     yield
 
 
@@ -79,6 +79,7 @@ def test_default_pipeline_is_stable_object():
     d1 = registry.get_default()
     d2 = registry.get_default()
     assert d1 is d2
+
 
 def test_unknown_kwargs_in_pipeline_raises_type_error():
     """Ensure that unexpected kwargs raise TypeError for both pipeline functions."""

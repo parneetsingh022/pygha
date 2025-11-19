@@ -14,4 +14,4 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - run: pip install pypipe
+      - run: pip install pygha

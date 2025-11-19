@@ -9,13 +9,13 @@ Notes:
     - The default pipeline is always available under the name "default".
 """
 
-from typing import Dict, Unpack
+from typing import Unpack
 from .models import Pipeline
 from .trigger_event import PipelineSettings, PipelineSettingsKwargs
 from dataclasses import fields
 
 # Global registry of pipelines
-_pipelines: Dict[str, Pipeline] = {"ci": Pipeline(name='ci')}
+_pipelines: dict[str, Pipeline] = {"ci": Pipeline(name="ci")}
 
 
 def get_default() -> Pipeline:
@@ -74,12 +74,14 @@ def pipeline(name: str, **kwargs: Unpack[PipelineSettingsKwargs]) -> Pipeline:
     unknown = set(kwargs).difference(allowed)
     if unknown:
         ks = ", ".join(sorted(unknown))
-        raise TypeError(f"Unknown keyword argument(s): {ks}. "
-                        f"Allowed: {', '.join(sorted(allowed))}")
+        raise TypeError(
+            f"Unknown keyword argument(s): {ks}. " f"Allowed: {', '.join(sorted(allowed))}"
+        )
 
     new_settings = PipelineSettings(**kwargs)
     pipe_instance.pipeline_settings = new_settings
     return pipe_instance
+
 
 def default_pipeline(**kwargs: Unpack[PipelineSettingsKwargs]) -> Pipeline:
     return pipeline(name="ci", **kwargs)

@@ -1,0 +1,26 @@
+package:
+  name: pypipe
+  version: "0.1.0"
+
+source:
+  path: ../src/
+
+build:
+  noarch: python
+  script: python -m pip install . -vv
+
+requirements:
+  host:
+    - python >=3.11
+    - pip
+  run:
+    - python
+
+about:
+  home: https://github.com/parneetsingh022/pypipe/
+  license: MIT
+  summary: "A Python-native CI/CD framework for defining, testing, and transpiling pipelines to GitHub Actions."
+
+extra:
+  recipe-maintainers:
+    - psidhu22

@@ -1,7 +1,7 @@
 Command Line Interface
 =========================
 
-The :mod:`pypipe.cli` module exposes a ``pypipe`` console script with a
+The :mod:`pygha.cli` module exposes a ``pygha`` console script with a
 single ``build`` sub-command.  It scans a source directory for pipeline
 files, executes them to populate the registry, and transpiles each
 registered pipeline to GitHub Actions YAML.
@@ -11,7 +11,7 @@ Usage
 
 .. code-block:: console
 
-   $ pypipe build --src-dir .pipe --out-dir .github/workflows --clean
+   $ pygha build --src-dir .pipe --out-dir .github/workflows --clean
 
 Options
 ----------
@@ -22,11 +22,11 @@ Options
 
 ``--out-dir``
    Defaults to ``.github/workflows``.  For each registered pipeline a
-   ``<name>.yml`` file is written using :class:`pypipe.transpilers.github.GitHubTranspiler`.
+   ``<name>.yml`` file is written using :class:`pygha.transpilers.github.GitHubTranspiler`.
 
 ``--clean``
    Deletes orphaned YAML files from the output directory unless they
-   start with ``# pypipe: keep`` within the first ten lines.  This is a
+   start with ``# pygha: keep`` within the first ten lines.  This is a
    useful safety valve when rotating pipelines.
 
 Exit status

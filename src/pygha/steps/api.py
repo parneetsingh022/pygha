@@ -4,7 +4,7 @@ from collections.abc import Generator
 from contextvars import ContextVar
 
 from .builtin import RunShellStep, CheckoutStep
-from pypipe.models import Job, Step
+from pygha.models import Job, Step
 
 _current_job: ContextVar[Job | None] = ContextVar("_current_job", default=None)
 

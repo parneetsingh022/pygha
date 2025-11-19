@@ -4,21 +4,21 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-# Ensure the ``src`` directory is on sys.path so Sphinx sees ``pypipe``
+# Ensure the ``src`` directory is on sys.path so Sphinx sees ``pygha``
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SRC_PATH = REPO_ROOT / "src"
 sys.path.insert(0, str(SRC_PATH))
 
 try:
-    import pypipe
+    import pygha
 
-    release = pypipe.__version__
+    release = pygha.__version__
 except Exception:  # pragma: no cover - docs build fallback
     release = "0.0.0"
 
-project = "pypipe"
-copyright = f"{datetime.now():%Y}, PyPipe contributors"
-author = "PyPipe contributors"
+project = "pygha"
+copyright = f"{datetime.now():%Y}, pygha contributors"
+author = "pygha contributors"
 
 extensions = [
     "sphinx.ext.autodoc",

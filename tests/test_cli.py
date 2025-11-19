@@ -5,11 +5,12 @@ from types import SimpleNamespace
 import runpy
 
 
-from pypipe import registry
-from pypipe.cli import main as cli_main
+from pygha import registry
+from pygha.cli import main as cli_main
 
 
 # ---------- helpers ----------
+
 
 def write(p: Path, content: str) -> None:
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -37,19 +38,22 @@ def clean_registry():
 @pytest.fixture
 def fake_transpiler(monkeypatch):
     """Patch the transpiler at the call site used by the CLI."""
+
     class FakeTranspiler:
         def __init__(self, pipe):
             self.pipe = pipe
+
         def to_yaml(self):
             # deterministic, tiny output for simple assertions
             return f"name: {self.pipe.name}\njobs: {{}}\n"
 
-    # IMPORTANT: patch where it's used (pypipe.cli), not where it's defined
-    monkeypatch.setattr("pypipe.cli.GitHubTranspiler", FakeTranspiler)
+    # IMPORTANT: patch where it's used (pygha.cli), not where it's defined
+    monkeypatch.setattr("pygha.cli.GitHubTranspiler", FakeTranspiler)
     return FakeTranspiler
 
 
 # ---------- tests ----------
+
 
 def test_build_generates_one_file_per_pipeline(tmp_path, monkeypatch, fake_transpiler, capsys):
     src_dir = tmp_path / ".pipe"
@@ -89,10 +93,10 @@ def test_build_clean_removes_orphans_but_keeps_marked(tmp_path, monkeypatch, fak
     out_dir.mkdir(parents=True)
 
     # existing workflows
-    write(out_dir / "old.yml", "name: old\n")                               # should be deleted
-    write(out_dir / "keep1.yml", "# pypipe: keep\nname: keep1\n")           # keep
-    write(out_dir / "keep2.yml", "#pypipe :    KEEP\nname: keep2\n")        # keep (spacing/case)
-    write(out_dir / "pipe1.yml", "name: pipe1\n")                           # will be rewritten
+    write(out_dir / "old.yml", "name: old\n")  # should be deleted
+    write(out_dir / "keep1.yml", "# pygha: keep\nname: keep1\n")  # keep
+    write(out_dir / "keep2.yml", "#pygha :    KEEP\nname: keep2\n")  # keep (spacing/case)
+    write(out_dir / "pipe1.yml", "name: pipe1\n")  # will be rewritten
 
     # pipelines produced by current run: only "pipe1"
     write(src_dir / "pipeline_any.py", "print('hi')")
@@ -103,7 +107,8 @@ def test_build_clean_removes_orphans_but_keeps_marked(tmp_path, monkeypatch, fak
     monkeypatch.setattr("runpy.run_path", fake_run_path)
 
     # sanity: keep marker detection
-    from pypipe.cli import _has_keep_marker
+    from pygha.cli import _has_keep_marker
+
     assert _has_keep_marker(out_dir / "keep1.yml")
     assert _has_keep_marker(out_dir / "keep2.yml")
 
@@ -116,7 +121,9 @@ def test_build_clean_removes_orphans_but_keeps_marked(tmp_path, monkeypatch, fak
     assert (out_dir / "pipe1.yml").read_text(encoding="utf-8") == "name: pipe1\njobs: {}\n"
 
 
-def test_build_no_pipelines_prints_message_and_exits_zero(tmp_path, monkeypatch, capsys, fake_transpiler):
+def test_build_no_pipelines_prints_message_and_exits_zero(
+    tmp_path, monkeypatch, capsys, fake_transpiler
+):
     src_dir = tmp_path / ".pipe"
     out_dir = tmp_path / ".github" / "workflows"
     src_dir.mkdir(parents=True)
@@ -229,14 +236,14 @@ def test_build_deduplicates_double_matched_files(tmp_path, monkeypatch, capsys, 
 
 
 def test_get_pipelines_dict_raises_when_missing(monkeypatch):
-    """If pypipe.registry has no _pipelines attr, raise a helpful RuntimeError."""
-    from pypipe.cli import _get_pipelines_dict
-    import pypipe.registry as reg
+    """If pygha.registry has no _pipelines attr, raise a helpful RuntimeError."""
+    from pygha.cli import _get_pipelines_dict
+    import pygha.registry as reg
 
     # Remove the attribute, then restore it so the autouse clean_registry teardown succeeds.
     monkeypatch.delattr(reg, "_pipelines", raising=False)
     try:
-        with pytest.raises(RuntimeError, match="No _pipelines found in pypipe.registry"):
+        with pytest.raises(RuntimeError, match="No _pipelines found in pygha.registry"):
             _get_pipelines_dict()
     finally:
         # Restore a dict so clean_registry's .clear()/.update() won't crash
@@ -244,14 +251,14 @@ def test_get_pipelines_dict_raises_when_missing(monkeypatch):
 
 
 def test_get_pipelines_dict_raises_when_not_dict(monkeypatch):
-    """If pypipe.registry._pipelines exists but is not a dict, raise the same RuntimeError."""
-    from pypipe.cli import _get_pipelines_dict
-    import pypipe.registry as reg
+    """If pygha.registry._pipelines exists but is not a dict, raise the same RuntimeError."""
+    from pygha.cli import _get_pipelines_dict
+    import pygha.registry as reg
 
     # Set to wrong type, then restore it so the autouse clean_registry teardown succeeds.
     monkeypatch.setattr(reg, "_pipelines", [], raising=False)
     try:
-        with pytest.raises(RuntimeError, match="No _pipelines found in pypipe.registry"):
+        with pytest.raises(RuntimeError, match="No _pipelines found in pygha.registry"):
             _get_pipelines_dict()
     finally:
         # Restore a dict so clean_registry's .clear()/.update() won't crash
@@ -261,29 +268,31 @@ def test_get_pipelines_dict_raises_when_not_dict(monkeypatch):
 def test_has_keep_marker_within_max_lines_is_detected(tmp_path):
     # Marker is on the 10th line (1-based), i == 9 — should be checked with max_lines=10
     p = tmp_path / "wf.yml"
-    lines = ["noise\n"] * 9 + ["# pypipe: keep\n", "more\n"]
+    lines = ["noise\n"] * 9 + ["# pygha: keep\n", "more\n"]
     p.write_text("".join(lines), encoding="utf-8")
 
-    from pypipe.cli import _has_keep_marker
+    from pygha.cli import _has_keep_marker
+
     assert _has_keep_marker(p, max_lines=10) is True
 
 
 def test_has_keep_marker_past_max_lines_is_ignored(tmp_path):
     # Marker is on the 11th line (1-based), i == 10 — loop breaks before seeing it when max_lines=10
     p = tmp_path / "wf.yml"
-    lines = ["noise\n"] * 10 + ["# pypipe: keep\n", "more\n"]
+    lines = ["noise\n"] * 10 + ["# pygha: keep\n", "more\n"]
     p.write_text("".join(lines), encoding="utf-8")
 
-    from pypipe.cli import _has_keep_marker
+    from pygha.cli import _has_keep_marker
+
     assert _has_keep_marker(p, max_lines=10) is False
     # Sanity check: increasing the window should reveal it
     assert _has_keep_marker(p, max_lines=11) is True
 
 
-
 # ── PermissionError -> chmod -> unlink succeeds -> True
 def test_safe_unlink_permissionerror_then_chmod_then_success(tmp_path, monkeypatch):
-    from pypipe.cli import _safe_unlink
+    from pygha.cli import _safe_unlink
+
     target = tmp_path / "file.yml"
     target.write_text("x", encoding="utf-8")
 
@@ -310,7 +319,8 @@ def test_safe_unlink_permissionerror_then_chmod_then_success(tmp_path, monkeypat
 
 # ── PermissionError -> chmod succeeds -> unlink fails -> False
 def test_safe_unlink_permissionerror_then_chmod_then_unlink_fails(tmp_path, monkeypatch):
-    from pypipe.cli import _safe_unlink
+    from pygha.cli import _safe_unlink
+
     target = tmp_path / "file.yml"
     target.write_text("x", encoding="utf-8")
 
@@ -335,7 +345,8 @@ def test_safe_unlink_permissionerror_then_chmod_then_unlink_fails(tmp_path, monk
 
 # ── PermissionError -> chmod fails -> False
 def test_safe_unlink_permissionerror_and_chmod_fails(tmp_path, monkeypatch):
-    from pypipe.cli import _safe_unlink
+    from pygha.cli import _safe_unlink
+
     target = tmp_path / "file.yml"
     target.write_text("x", encoding="utf-8")
 
@@ -358,7 +369,8 @@ def test_safe_unlink_permissionerror_and_chmod_fails(tmp_path, monkeypatch):
 
 # ── FileNotFoundError -> True
 def test_safe_unlink_file_not_found_returns_true(tmp_path, monkeypatch):
-    from pypipe.cli import _safe_unlink
+    from pygha.cli import _safe_unlink
+
     target = tmp_path / "missing.yml"
 
     def fake_unlink(self):
@@ -371,7 +383,8 @@ def test_safe_unlink_file_not_found_returns_true(tmp_path, monkeypatch):
 
 # ── Any other Exception -> False
 def test_safe_unlink_other_exception_returns_false(tmp_path, monkeypatch):
-    from pypipe.cli import _safe_unlink
+    from pygha.cli import _safe_unlink
+
     target = tmp_path / "file.yml"
     target.write_text("x", encoding="utf-8")
 
@@ -384,31 +397,31 @@ def test_safe_unlink_other_exception_returns_false(tmp_path, monkeypatch):
 
 
 def test_clean_orphaned_warns_when_unlink_fails(tmp_path, monkeypatch, capsys):
-    from pypipe.cli import _clean_orphaned
+    from pygha.cli import _clean_orphaned
 
     out_dir = tmp_path
     orphan = out_dir / "orphan.yml"
     orphan.write_text("name: orphan\n", encoding="utf-8")  # no keep marker
 
     # Force the deletion helper to "fail" so the warning path executes
-    monkeypatch.setattr("pypipe.cli._safe_unlink", lambda p: False)
+    monkeypatch.setattr("pygha.cli._safe_unlink", lambda p: False)
 
     _clean_orphaned(out_dir, valid_names=set())
 
     out = capsys.readouterr().out
     # Assert the yellow warning with ANSI codes and filename is printed
-    assert f"\033[93m[PyPipe] Warning: could not remove {orphan} (permissions?)\033[0m" in out
+    assert f"\033[93m[pygha] Warning: could not remove {orphan} (permissions?)\033[0m" in out
     # And the file was not removed
     assert orphan.exists()
 
 
-
 def test_main_dispatches_to_cmd_build(monkeypatch, tmp_path):
     # Arrange: patch cmd_build to capture args and return a sentinel code
-    from pypipe.cli import main as cli_main
-    import pypipe.cli as cli
+    from pygha.cli import main as cli_main
+    import pygha.cli as cli
 
     called = {}
+
     def fake_cmd_build(src_dir, out_dir, clean):
         called.update({"src_dir": src_dir, "out_dir": out_dir, "clean": clean})
         return 123  # sentinel
@@ -416,20 +429,22 @@ def test_main_dispatches_to_cmd_build(monkeypatch, tmp_path):
     monkeypatch.setattr(cli, "cmd_build", fake_cmd_build)
 
     # Act
-    rc = cli_main(["build", "--src-dir", str(tmp_path/"s"), "--out-dir", str(tmp_path/"o"), "--clean"])
+    rc = cli_main(
+        ["build", "--src-dir", str(tmp_path / "s"), "--out-dir", str(tmp_path / "o"), "--clean"]
+    )
 
     # Assert: dispatch & args wired correctly, return code propagated
     assert rc == 123
     assert called == {
-        "src_dir": str(tmp_path/"s"),
-        "out_dir": str(tmp_path/"o"),
+        "src_dir": str(tmp_path / "s"),
+        "out_dir": str(tmp_path / "o"),
         "clean": True,
     }
 
 
 def test_main_returns_zero_for_unknown_command(monkeypatch):
     # Arrange: bypass argparse parsing to simulate a non-"build" command
-    from pypipe.cli import main as cli_main
+    from pygha.cli import main as cli_main
     import argparse
 
     monkeypatch.setattr(
@@ -445,22 +460,25 @@ def test_main_returns_zero_for_unknown_command(monkeypatch):
     # Assert: falls through to the final `return 0`
     assert rc == 0
 
+
 def test_dunder_main_propagates_exit_code(monkeypatch):
     # Make cli.main return a sentinel so we can assert SystemExit.code
-    import pypipe.cli as cli
+    import pygha.cli as cli
+
     monkeypatch.setattr(cli, "main", lambda *a, **k: 123)
 
     with pytest.raises(SystemExit) as exc:
-        runpy.run_module("pypipe.__main__", run_name="__main__", alter_sys=True)
+        runpy.run_module("pygha.__main__", run_name="__main__", alter_sys=True)
 
     assert exc.value.code == 123
 
 
 def test_dunder_main_handles_nonzero_exit(monkeypatch):
-    import pypipe.cli as cli
+    import pygha.cli as cli
+
     monkeypatch.setattr(cli, "main", lambda *a, **k: 2)
 
     with pytest.raises(SystemExit) as exc:
-        runpy.run_module("pypipe.__main__", run_name="__main__", alter_sys=True)
+        runpy.run_module("pygha.__main__", run_name="__main__", alter_sys=True)
 
     assert exc.value.code == 2

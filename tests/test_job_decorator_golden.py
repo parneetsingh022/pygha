@@ -1,8 +1,8 @@
 import pytest
-from pypipe import job, pipeline, default_pipeline
-from pypipe.steps import shell, checkout, echo
-from pypipe.transpilers.github import GitHubTranspiler
-from pypipe.registry import register_pipeline, reset_registry
+from pygha import job, pipeline, default_pipeline
+from pygha.steps import shell, checkout, echo
+from pygha.transpilers.github import GitHubTranspiler
+from pygha.registry import register_pipeline, reset_registry
 
 
 @pytest.fixture(autouse=True)
@@ -79,7 +79,7 @@ def test_pipeline_creation_with_push(assert_matches_golden):
 
     @job(name="build", pipeline=mypipe)
     def initial_job():
-        shell("pip install pypipe")
+        shell("pip install pygha")
 
     out = GitHubTranspiler(mypipe).to_yaml()
 
@@ -94,7 +94,7 @@ def test_pipeline_creation_with_pr(assert_matches_golden):
 
     @job(name="build", pipeline=mypipe)
     def initial_job():
-        shell("pip install pypipe")
+        shell("pip install pygha")
 
     out = GitHubTranspiler(mypipe).to_yaml()
 
@@ -110,7 +110,7 @@ def test_pipeline_creation_with_bool(assert_matches_golden):
 
     @job(name="build", pipeline=mypipe)
     def initial_job():
-        shell("pip install pypipe")
+        shell("pip install pygha")
 
     out = GitHubTranspiler(mypipe).to_yaml()
 
@@ -126,7 +126,7 @@ def test_pipeline_creation_with_dict_triggers(assert_matches_golden):
 
     @job(name="build", pipeline=mypipe)
     def build_job():
-        shell("pip install pypipe")
+        shell("pip install pygha")
 
     out = GitHubTranspiler(mypipe).to_yaml()
     assert_matches_golden(out, "test_pipeline_creation_with_dict_triggers.yml")
@@ -137,7 +137,7 @@ def test_pipeline_default_when_no_triggers(assert_matches_golden):
 
     @job(name="build", pipeline=mypipe)
     def build_job():
-        shell("pip install pypipe")
+        shell("pip install pygha")
 
     out = GitHubTranspiler(mypipe).to_yaml()
     assert_matches_golden(out, "test_pipeline_default_when_no_triggers.yml")
@@ -152,7 +152,7 @@ def test_pipeline_disable_push_with_empty_list(assert_matches_golden):
 
     @job(name="build", pipeline=mypipe)
     def build_job():
-        shell("pip install pypipe")
+        shell("pip install pygha")
 
     out = GitHubTranspiler(mypipe).to_yaml()
     assert_matches_golden(out, "test_pipeline_disable_push_with_empty_list.yml")
@@ -181,7 +181,7 @@ def test_pipeline_mixed_dict_and_string(assert_matches_golden):
 
     @job(name="build", pipeline=mypipe)
     def build_job():
-        shell("pip install pypipe")
+        shell("pip install pygha")
 
     out = GitHubTranspiler(mypipe).to_yaml()
     assert_matches_golden(out, "test_pipeline_mixed_dict_and_string.yml")

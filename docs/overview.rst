@@ -1,24 +1,24 @@
 Overview
 ========
 
-PyPipe treats a workflow as a small graph of :class:`~pypipe.models.Job`
-objects and keeps them inside a :class:`~pypipe.models.Pipeline`.
+pygha treats a workflow as a small graph of :class:`~pygha.models.Job`
+objects and keeps them inside a :class:`~pygha.models.Pipeline`.
 Each job owns an ordered list of steps and optional dependencies on the
-other jobs.  The registry in :mod:`pypipe.registry` stores every
+other jobs.  The registry in :mod:`pygha.registry` stores every
 pipeline by name so the CLI and transpilers can look them up later.
 
 Minimal pipeline
 ----------------
 
-The default pipeline is called ``ci``.  The :func:`pypipe.registry.default_pipeline`
+The default pipeline is called ``ci``.  The :func:`pygha.registry.default_pipeline`
 helper returns it and accepts keyword arguments that map directly to
-:class:`pypipe.trigger_event.PipelineSettings`.  A practical pipeline
+:class:`pygha.trigger_event.PipelineSettings`.  A practical pipeline
 usually consists of at least one ``@job`` function:
 
 .. code-block:: python
 
-   from pypipe.decorators import job
-   from pypipe.steps import shell, checkout
+   from pygha.decorators import job
+   from pygha.steps import shell, checkout
 
    @job()
    def build():
@@ -28,7 +28,7 @@ usually consists of at least one ``@job`` function:
 
    if __name__ == "__main__":
        # ensure the pipeline exists and optionally tweak triggers
-       from pypipe.registry import default_pipeline
+       from pygha.registry import default_pipeline
 
        default_pipeline(on_push=["main", "release"], on_pull_request=True)
 
@@ -89,14 +89,14 @@ support several types to handle common GitHub Actions patterns:
 Creating Multiple Pipelines
 ---------------------------
 
-You can define multiple workflows in a single file (e.g., a CI workflow and a separate Release workflow) using the :func:`pypipe.registry.pipeline` function.
+You can define multiple workflows in a single file (e.g., a CI workflow and a separate Release workflow) using the :func:`pygha.registry.pipeline` function.
 
 To assign a job to a specific pipeline, pass the pipeline object or its name to the ``@job`` decorator:
 
 .. code-block:: python
 
-   from pypipe import pipeline, job
-   from pypipe.steps import shell
+   from pygha import pipeline, job
+   from pygha.steps import shell
 
    # 1. Define or retrieve the pipelines
    # 'ci' is the default, but we can configure it explicitly here

@@ -1,12 +1,12 @@
 import textwrap
 import subprocess
 
-from pypipe.transpilers.github import GitHubTranspiler
-from pypipe.steps.builtin import RunShellStep, CheckoutStep
-from pypipe.models import Job, Pipeline
+from pygha.transpilers.github import GitHubTranspiler
+from pygha.steps.builtin import RunShellStep, CheckoutStep
+from pygha.models import Job, Pipeline
 import pytest
 
-from pypipe.steps import shell, checkout, echo, active_job
+from pygha.steps import shell, checkout, echo, active_job
 
 
 def _build_pipeline_basic() -> Pipeline:
