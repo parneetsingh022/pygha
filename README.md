@@ -1,43 +1,44 @@
 <div align="center">
-  <a href="https://github.com/parneetsingh022/pypipe"><img alt="logo_pypipe_dark" width="300px" src="https://github.com/user-attachments/assets/89e9f3c9-0184-41ee-9643-f0621e114d67" /></a>
+  <a href="https://github.com/parneetsingh022/pygha"><img alt="logo_pygha_dark" width="300px" src="https://github.com/user-attachments/assets/c2801ef9-4224-4cff-8f29-1e4464833a3a" /></a>
 </div>
+
 
 <p align="center">
   <em>A Python-native CI/CD framework for defining, testing, and transpiling pipelines to GitHub Actions.</em>
 </p>
 <p align="center">
-  <strong><a href="https://pypipe.readthedocs.io/">Read the Full Documentation</a></strong>
+  <strong><a href="https://pygha.readthedocs.io/">Read the Full Documentation</a></strong>
 </p>
 
 ---
 
 <p align="center">
-  <a href="https://github.com/parneetsingh022/pypipe/actions/workflows/ci.yml">
-    <img src="https://github.com/parneetsingh022/pypipe/actions/workflows/ci.yml/badge.svg" alt="CI Status">
+  <a href="https://github.com/parneetsingh022/pygha/actions/workflows/ci.yml">
+    <img src="https://github.com/parneetsingh022/pygha/actions/workflows/ci.yml/badge.svg" alt="CI Status">
   </a>
-  <a href="https://pypipe.readthedocs.io/">
-    <img src="https://img.shields.io/readthedocs/pypipe" alt="Documentation Status">
+  <a href="https://pygha.readthedocs.io/">
+    <img src="https://img.shields.io/readthedocs/pygha" alt="Documentation Status">
   </a>
-  <a href="https://codecov.io/gh/parneetsingh022/pypipe">
-    <img src="https://codecov.io/gh/parneetsingh022/pypipe/branch/main/graph/badge.svg" alt="Coverage">
+  <a href="https://codecov.io/gh/parneetsingh022/pygha">
+    <img src="https://codecov.io/gh/parneetsingh022/pygha/branch/main/graph/badge.svg" alt="Coverage">
   </a>
   <img src="https://img.shields.io/badge/lint-Ruff-blue" alt="Lint (Ruff)">
   <img src="https://img.shields.io/badge/type--check-mypy-blue" alt="Type Check (mypy)">
   <img src="https://img.shields.io/badge/security-Bandit-green" alt="Security (Bandit)">
   <a href="LICENSE">
-    <img src="https://img.shields.io/github/license/parneetsingh022/pypipe.svg" alt="License">
+    <img src="https://img.shields.io/github/license/parneetsingh022/pygha.svg" alt="License">
   </a>
 </p>
 
 ---
-## Example: Define a CI Pipeline with `pypipe`
+## Example: Define a CI Pipeline with `pygha`
 
 Below is an example of a **Python-defined pipeline** that mirrors what most teams use in production —  
-build, lint, test, coverage, and deploy — all orchestrated through `pypipe`.
+build, lint, test, coverage, and deploy — all orchestrated through `pygha`.
 
 ```python
-from pypipe import job, default_pipeline
-from pypipe.steps import shell, checkout
+from pygha import job, default_pipeline
+from pygha.steps import shell, checkout
 
 # Define a default pipeline that triggers on main and dev branches,
 # and on pull requests to main.
