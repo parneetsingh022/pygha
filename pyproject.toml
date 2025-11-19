@@ -15,7 +15,8 @@ dependencies = [
 
 [project.optional-dependencies]
 docs = [
-    "sphinx"
+    "sphinx>=8.0.2",
+    "sphinx-autodoc-typehints>=2.4.4",
 ]
 
 [project.scripts]
