@@ -29,6 +29,17 @@ docs = [
     "sphinx-autodoc-typehints>=2.4.4",
 ]
 
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "tox>=4.18",
+    "build",
+    "twine",
+    "bandit>=1.7",
+]
+
 [project.scripts]
 pygha = "pygha.cli:main"
 
