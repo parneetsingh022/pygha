@@ -15,7 +15,7 @@ def _build_pipeline_basic():
         RunShellStep(command="pytest -v"),
     ]
     build = Job(name="build", steps=build_steps, runner_image=None, depends_on=None)
-    test = Job(name="test", steps=test_steps, runner_image=None, depends_on=["build"])
+    test = Job(name="test", steps=test_steps, runner_image=None, depends_on={"build"})
     pipeline = Pipeline(name="CI")
     pipeline.add_job(build)
     pipeline.add_job(test)
