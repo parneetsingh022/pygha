@@ -4,6 +4,7 @@ from pygha.decorators import job
 from pygha.transpilers.github import GitHubTranspiler
 from pygha.registry import reset_registry, register_pipeline
 from pygha.steps import shell
+from pygha.models import Pipeline
 
 # --- 1. Model Tests ---
 
@@ -55,8 +56,6 @@ def test_transpiler_generates_strategy_block():
     """Test that a Job with a matrix produces the correct 'strategy' dict."""
     # Manually create the job and pipeline (bypass decorator for unit test)
     job_obj = Job(name="test", matrix={"python": ["3.11", "3.12"]}, fail_fast=False)
-    # Mock pipeline structure
-    from pygha.models import Pipeline
 
     pipe = Pipeline(name="matrix-pipe")
     pipe.add_job(job_obj)
@@ -77,8 +76,6 @@ def test_transpiler_omits_fail_fast_if_none():
     """Test that fail-fast is not included in YAML if it wasn't set (None)."""
     job_obj = Job(name="test", matrix={"os": ["linux"]})
     # fail_fast defaults to None
-
-    from pygha.models import Pipeline
 
     pipe = Pipeline(name="matrix-pipe")
     pipe.add_job(job_obj)
