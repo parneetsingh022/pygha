@@ -27,6 +27,15 @@ class GitHubTranspiler:
                 "runs-on": job.runner_image or "ubuntu-latest",
             }
 
+            if job.matrix:
+                strategy: dict[str, Any] = {"matrix": job.matrix}
+
+                # Only add fail-fast if the user explicitly set it (True or False)
+                if job.fail_fast is not None:
+                    strategy["fail-fast"] = job.fail_fast
+
+                job_dict["strategy"] = strategy
+
             # Add 'needs' before 'steps'
             if job.depends_on:
                 deps = self._sorted_unique(job.depends_on)

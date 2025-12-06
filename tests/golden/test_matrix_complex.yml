@@ -1,0 +1,24 @@
+name: ci
+on:
+  push:
+    branches:
+      - main
+jobs:
+  test-complex:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version:
+          - '10'
+          - '12'
+        os:
+          - linux
+          - windows
+        include:
+          - os: macos
+            version: '14'
+            experimental: true
+        exclude:
+          - os: windows
+            version: '10'
+    steps: []

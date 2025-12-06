@@ -44,7 +44,7 @@ dev = [
 pygha = "pygha.cli:main"
 
 [tool.pytest.ini_options]
-addopts = "-q"
+addopts = ""
 testpaths = ["tests"]
 
 [tool.ruff]
