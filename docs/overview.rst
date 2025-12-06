@@ -17,10 +17,10 @@ usually consists of at least one ``@job`` function:
 
 .. code-block:: python
 
-   from pygha.decorators import job
+   from pygha import job
    from pygha.steps import shell, checkout
 
-   @job()
+   @job
    def build():
        checkout()
        shell("pip install -r requirements.txt")
