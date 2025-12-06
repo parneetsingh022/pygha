@@ -1,18 +1,7 @@
 import textwrap
 from pygha.transpilers.github import GitHubTranspiler
 from pygha.steps.builtin import RunShellStep, CheckoutStep
-from pygha.models import Pipeline
-
-
-# --- Minimal fakes for Pipeline/Job ---
-
-
-class FakeJob:
-    def __init__(self, name, steps, runner_image=None, depends_on=None):
-        self.name = name
-        self.steps = steps
-        self.runner_image = runner_image
-        self.depends_on = depends_on
+from pygha.models import Pipeline, Job
 
 
 def _build_pipeline_basic():
@@ -25,8 +14,8 @@ def _build_pipeline_basic():
         RunShellStep(command="echo Running tests..."),
         RunShellStep(command="pytest -v"),
     ]
-    build = FakeJob(name="build", steps=build_steps, runner_image=None, depends_on=None)
-    test = FakeJob(name="test", steps=test_steps, runner_image=None, depends_on=["build"])
+    build = Job(name="build", steps=build_steps, runner_image=None, depends_on=None)
+    test = Job(name="test", steps=test_steps, runner_image=None, depends_on={"build"})
     pipeline = Pipeline(name="CI")
     pipeline.add_job(build)
     pipeline.add_job(test)
@@ -38,7 +27,7 @@ def _build_pipeline_with_checkout_params():
     build_steps = [
         CheckoutStep(repository="octocat/hello-world", ref="main"),
     ]
-    build = FakeJob(name="build", steps=build_steps)
+    build = Job(name="build", steps=build_steps)
     pipeline = Pipeline(name="CI")
     pipeline.add_job(build)
 

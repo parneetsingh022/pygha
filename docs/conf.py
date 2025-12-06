@@ -41,4 +41,9 @@ html_static_path = ["_static"]
 html_logo = "_static/images/logo.png"
 
 # Give the logo breathing room on narrow layouts
-html_theme_options = {"logo_name": False, "logo_text_align": "center", "description": ""}
+html_theme_options = {
+    "logo_name": False,
+    "logo_text_align": "center",
+    "description": "",
+    "sidebar_collapse": False,
+}

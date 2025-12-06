@@ -115,3 +115,82 @@ To assign a job to a specific pipeline, pass the pipeline object or its name to 
        shell("twine upload dist/*")
 
 The CLI will generate a separate YAML file for each registered pipeline (e.g., ``ci.yml`` and ``release.yml``).
+
+Matrix Builds
+-------------
+
+pygha supports the ``matrix`` strategy, allowing you to run the same job multiple times
+with different configurations (e.g., testing across multiple Python versions or operating systems).
+
+You define the matrix as a dictionary in the ``@job`` decorator and access the values
+using standard GitHub Actions syntax (``${{ matrix.<variable> }}``).
+
+Basic Matrix
+~~~~~~~~~~~~
+
+In this example, the ``test`` job runs three times, once for each Python version.
+
+.. code-block:: python
+
+   from pygha import job
+   from pygha.steps import shell
+
+   @job(matrix={"python": ["3.11", "3.12", "3.13"]})
+   def test():
+       # Access the matrix context in your shell commands
+       shell("echo Running tests on Python ${{ matrix.python }}")
+
+Dynamic Runners (OS Matrix)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can use matrix variables to dynamically set the ``runs_on`` image, which is essential
+for cross-platform testing.
+
+.. code-block:: python
+
+   @job(
+       name="build",
+       runs_on="${{ matrix.os }}",
+       matrix={"os": ["ubuntu-latest", "macos-latest", "windows-latest"]}
+   )
+   def build_os():
+       shell("echo Building on ${{ matrix.os }}")
+
+Fail Fast
+~~~~~~~~~
+
+By default, GitHub Actions cancels all remaining jobs in a matrix if any single job fails.
+To let all jobs finish regardless of failure, set ``fail_fast=False``.
+
+.. code-block:: python
+
+   @job(
+       matrix={"shard": [1, 2, 3, 4]},
+       fail_fast=False
+   )
+   def long_running_test():
+       shell("./run_tests.sh --shard ${{ matrix.shard }}")
+
+Complex Matrices (Include/Exclude)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can also use the advanced GitHub Actions ``include`` and ``exclude`` features by passing
+a list of dictionaries.
+
+.. code-block:: python
+
+   @job(
+       matrix={
+           "os": ["linux", "windows"],
+           "version": ["10", "12"],
+           "include": [
+               {"os": "mac", "version": "14", "experimental": True}
+           ],
+           "exclude": [
+               {"os": "windows", "version": "10"}
+           ]
+       }
+   )
+   def complex_build():
+       # ...
+       pass

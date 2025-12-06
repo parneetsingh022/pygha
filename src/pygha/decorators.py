@@ -1,5 +1,5 @@
 # decorators.py
-from typing import TypeVar
+from typing import TypeVar, Any
 
 from collections.abc import Callable
 from .models import Job, Pipeline
@@ -14,6 +14,8 @@ def job(
     depends_on: list[str] | None = None,
     pipeline: str | Pipeline | None = None,
     runs_on: str | None = "ubuntu-latest",
+    matrix: dict[str, list[Any]] | None = None,
+    fail_fast: bool | None = None,
 ) -> Callable[[Callable[[], R]], Callable[[], R]]:
     """Decorator to define a job (expects a no-arg function)."""
 
@@ -33,6 +35,8 @@ def job(
             name=jname,
             depends_on=set(depends_on or []),
             runner_image=runs_on,
+            matrix=matrix,
+            fail_fast=fail_fast,
         )
 
         with active_job(job_obj):

@@ -55,6 +55,19 @@ class Job:
     runner_image: str | None = None
     """(Optional) The container image to run this job in (e.g., "ubuntu-latest")."""
 
+    matrix: dict[str, list[Any]] | None = None
+    """
+    (Optional) A dictionary defining a build matrix.
+    Keys are variable names (e.g., "python-version", "os") and values are lists of options.
+    This transpiles to the `strategy.matrix` block in GitHub Actions.
+    """
+
+    fail_fast: bool | None = None
+    """
+    (Optional) If True, cancels all in-progress jobs in the matrix if any single job fails.
+    If None, GitHub Actions defaults this to true.
+    """
+
     def add_step(self, step: Step) -> None:
         """A simple helper to add a step to this job."""
         self.steps.append(step)
