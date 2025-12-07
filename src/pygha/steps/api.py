@@ -2,8 +2,9 @@
 from contextlib import contextmanager
 from collections.abc import Generator
 from contextvars import ContextVar
+from typing import Any
 
-from .builtin import RunShellStep, CheckoutStep
+from .builtin import RunShellStep, CheckoutStep, UsesStep
 from pygha.models import Job, Step
 
 _current_job: ContextVar[Job | None] = ContextVar("_current_job", default=None)
@@ -40,3 +41,17 @@ def checkout(repository: str | None = None, ref: str | None = None, name: str = 
 def echo(message: str, name: str = "") -> Step:
     command = f'echo "{message}"'
     return shell(command, name=name)
+
+
+def uses(action: str, with_args: dict[str, Any] | None = None, name: str = "") -> Step:
+    """
+    Adds a generic 'uses' step to the active job.
+
+    Args:
+        action: The GitHub action identifier (e.g. 'actions/setup-python@v5').
+        with_args: A dictionary of inputs for the action (maps to 'with:').
+        name: Optional name for the step.
+    """
+    job = _get_active_job("uses")
+    job.add_step(UsesStep(action=action, with_args=with_args, name=name))
+    return job.steps[-1]

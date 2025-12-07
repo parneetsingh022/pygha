@@ -99,3 +99,34 @@ class CheckoutStep(Step):
             github_dict["with"] = with_details
 
         return github_dict
+
+
+@dataclass
+class UsesStep(Step):
+    """
+    A generic step that uses a GitHub Action.
+    Example: uses("actions/setup-python@v5", with_args={"python-version": "3.12"})
+    """
+
+    action: str = field(default="")
+    with_args: dict[str, Any] | None = None
+
+    def execute(self, context: Any) -> None:
+        """Simulates the action for local runs."""
+        print(f"[Simulating] Using action: {self.action}")
+        if self.with_args:
+            print(f"             With args: {self.with_args}")
+
+    def to_github_dict(self) -> dict[str, Any]:
+        """Transpiles to the GitHub Actions 'uses' block."""
+        step_dict: dict[str, Any] = {}
+
+        if self.name:
+            step_dict["name"] = self.name
+
+        step_dict["uses"] = self.action
+
+        if self.with_args:
+            step_dict["with"] = self.with_args
+
+        return step_dict
