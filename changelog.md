@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Matrix Strategy**: Added support for defining build matrices in jobs via the `matrix` argument in the `@job` decorator. This allows for dynamic job generation (e.g., testing across multiple Python versions or operating systems).
 - **Fail Fast**: Added `fail_fast` argument to `@job` to control the `strategy: fail-fast` behavior in generated workflows.
+- **Generic Uses Step**: Added `uses()` helper in `pygha.steps` to allow using any GitHub Action from the marketplace (e.g., `uses("actions/setup-python@v5")`). This supports both `with` arguments and custom step names.
 
 ### Changed
 - **Test Infrastructure**: Refactored `tests/transpilers/test_github.py` to use real `Job` models instead of the `FakeJob` class, ensuring tests stay synchronized with the core model definitions.
