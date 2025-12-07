@@ -58,48 +58,42 @@ conda install -c psidhu22 pygha
 
 ## Example: Define a CI Pipeline with `pygha`
 
-Below is an example of a **Python-defined pipeline** that mirrors what most teams use in production —  
+Below is an example of a **Python-defined pipeline** that mirrors what most teams use in production —
 build, lint, test, coverage, and deploy — all orchestrated through `pygha`.
 
 ```python
 from pygha import job, default_pipeline
-from pygha.steps import shell, checkout
+from pygha.steps import shell, checkout, uses
 
-# Define a default pipeline that triggers on main and dev branches,
-# and on pull requests to main.
-default = default_pipeline(
-    on_push=['main', 'dev'],
-    on_pull_request='main'
+# Configure the default pipeline to run on main push and PRs
+default_pipeline(on_push=["main"], on_pull_request=True)
+
+@job(
+    name="test",
+    matrix={"python": ["3.11", "3.12", "3.13"]},
 )
-
-@job(name='lint')
-def lint():
-    """Static analysis and style checks."""
+def test_matrix():
+    """Run tests across multiple Python versions."""
     checkout()
-    shell('pip install -U pip ruff mypy')
-    shell('ruff check .')
-    shell('mypy src')
 
-@job(name='build', depends_on=['lint'])
-def build():
-    """Build the package."""
-    checkout()
-    shell('pip install -U build')
-    shell('python -m build')
+    # Use the matrix variable in your step arguments
+    uses(
+        "actions/setup-python@v5",
+        with_args={"python-version": "${{ matrix.python }}"}
+    )
 
-@job(name='test', depends_on=['build'])
-def test():
-    """Run unit tests with coverage."""
-    checkout()
-    shell('pip install -e .[dev]')
-    shell('pytest --cov=src --cov-report=xml')
+    shell("pip install .[dev]")
+    shell("pytest")
 
-@job(name='deploy', depends_on=['test'])
+@job(name="deploy", depends_on=["test"])
 def deploy():
-    """Deploy to PyPI when pushing a tagged release."""
+    """Build and publish if tests pass."""
     checkout()
-    shell('pip install twine')
-    shell('if [[ "$GITHUB_REF" == refs/tags/* ]]; then twine upload dist/*; fi')
+    uses("actions/setup-python@v5", with_args={"python-version": "3.11"})
+
+    shell("pip install build twine")
+    shell("python -m build")
+    shell("twine check dist/*")
 ```
 
 ---
