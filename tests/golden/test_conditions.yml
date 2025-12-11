@@ -1,0 +1,27 @@
+name: ci
+on:
+  push:
+    branches:
+      - main
+jobs:
+  complex-logic:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo 'Running on Linux'
+        if: runner.os == 'Linux'
+      - run: echo 'Prod or Schedule'
+        if: (github.ref == 'refs/heads/main') || (github.event_name == 'schedule')
+      - run: echo 'Not production'
+        if: env.DEPLOY_ENV != 'production'
+      - run: echo 'Previous steps succeeded AND not prod'
+        if: (env.DEPLOY_ENV != 'production') && (success())
+      - run: echo 'Not a bot'
+        if: "!(github.actor == 'dependabot')"
+      - run: echo 'Admin on X64'
+        if: (github.actor == 'admin') && (runner.arch == 'X64')
+      - run: echo 'Cleanup or finalize'
+        if: always()
+      - run: echo 'Something failed earlier'
+        if: failure()

@@ -21,6 +21,7 @@ class Step(ABC):
     """Abstract base class for all pipeline steps."""
 
     name: str = field(default="")
+    if_condition: str | None = None
 
     @abstractmethod
     def execute(self, context: Any) -> None:  # pragma: no cover
@@ -67,6 +68,8 @@ class Job:
     (Optional) If True, cancels all in-progress jobs in the matrix if any single job fails.
     If None, GitHub Actions defaults this to true.
     """
+
+    if_condition: str | None = None
 
     def add_step(self, step: Step) -> None:
         """A simple helper to add a step to this job."""

@@ -27,6 +27,9 @@ class GitHubTranspiler:
                 "runs-on": job.runner_image or "ubuntu-latest",
             }
 
+            if job.if_condition:
+                job_dict["if"] = job.if_condition
+
             if job.matrix:
                 strategy: dict[str, Any] = {"matrix": job.matrix}
 
@@ -36,13 +39,22 @@ class GitHubTranspiler:
 
                 job_dict["strategy"] = strategy
 
-            # Add 'needs' before 'steps'
             if job.depends_on:
                 deps = self._sorted_unique(job.depends_on)
                 job_dict["needs"] = deps
 
+            steps_list = []
+            for step in job.steps:
+                d = step.to_github_dict()
+                if step.if_condition:
+                    # Insert 'if' at the top level of the step dict
+                    # (Order doesn't strictly matter for JSON/YAML dicts,
+                    # but usually 'if' is near 'name' or 'run')
+                    d["if"] = step.if_condition
+                steps_list.append(d)
+
             # Now add steps
-            job_dict["steps"] = [step.to_github_dict() for step in job.steps]
+            job_dict["steps"] = steps_list
 
             jobs_dict[job.name] = job_dict
 
@@ -57,6 +69,7 @@ class GitHubTranspiler:
         yaml12 = YAML()
         yaml12.indent(mapping=2, sequence=4, offset=2)
         yaml12.default_flow_style = False
+        yaml12.width = 4096
 
         from io import StringIO
 

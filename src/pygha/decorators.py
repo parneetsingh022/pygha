@@ -5,8 +5,20 @@ from collections.abc import Callable
 from .models import Job, Pipeline
 from .registry import get_default, register_pipeline
 from .steps.api import active_job
+from .expr import Expression
 
 R = TypeVar("R")
+
+
+def run_if(condition: str | Expression) -> Callable[[Callable[..., R]], Callable[..., R]]:
+    """Decorator to add an 'if' condition to a job."""
+
+    def wrapper(func: Callable[..., R]) -> Callable[..., R]:
+        # Store the condition on the function object itself
+        setattr(func, "_pygha_if", str(condition))
+        return func
+
+    return wrapper
 
 
 def job(
@@ -21,6 +33,8 @@ def job(
 
     def wrapper(func: Callable[[], R]) -> Callable[[], R]:
         jname = name or func.__name__
+
+        condition = getattr(func, "_pygha_if", None)
 
         if pipeline is None:
             pipe = get_default()
@@ -37,6 +51,7 @@ def job(
             runner_image=runs_on,
             matrix=matrix,
             fail_fast=fail_fast,
+            if_condition=condition,
         )
 
         with active_job(job_obj):
