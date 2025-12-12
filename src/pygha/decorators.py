@@ -22,17 +22,17 @@ def run_if(condition: str | Expression) -> Callable[[Callable[..., R]], Callable
 
 
 def job(
-    name: str | None = None,
+    name: str | Callable[..., Any] | None = None,
     depends_on: list[str] | None = None,
     pipeline: str | Pipeline | None = None,
     runs_on: str | None = "ubuntu-latest",
     matrix: dict[str, list[Any]] | None = None,
     fail_fast: bool | None = None,
-) -> Callable[[Callable[[], R]], Callable[[], R]]:
+) -> Callable[[Callable[[], R]], Callable[[], R]] | Callable[[], R]:
     """Decorator to define a job (expects a no-arg function)."""
 
-    def wrapper(func: Callable[[], R]) -> Callable[[], R]:
-        jname = name or func.__name__
+    def _register(func: Callable[[], R], _name: str | None) -> Callable[[], R]:
+        jname = _name or func.__name__
 
         condition = getattr(func, "_pygha_if", None)
 
@@ -59,5 +59,15 @@ def job(
 
         pipe.add_job(job_obj)
         return func
+
+    if callable(name):
+        # The user called @job without parens, so 'name' is actually the function.
+        # We must register it immediately with default name=None.
+        func = name
+        return _register(func, None)
+
+    def wrapper(func: Callable[[], R]) -> Callable[[], R]:
+        # The user called @job(name="foo"), so 'name' is the string name.
+        return _register(func, name)
 
     return wrapper
