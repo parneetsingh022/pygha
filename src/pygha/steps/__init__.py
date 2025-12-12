@@ -1,4 +1,4 @@
-from .api import active_job, shell, checkout, echo, uses
+from .api import active_job, shell, checkout, echo, uses, when
 
 __all__ = [
     "active_job",
@@ -6,4 +6,5 @@ __all__ = [
     "checkout",
     "echo",
     "uses",
+    "when",
 ]

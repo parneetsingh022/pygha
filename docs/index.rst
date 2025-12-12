@@ -15,5 +15,6 @@ they fit together during a typical build.
 
    overview
    steps
+   conditionals
    cli
    api
