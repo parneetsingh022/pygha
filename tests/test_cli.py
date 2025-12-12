@@ -20,7 +20,7 @@ def write(p: Path, content: str) -> None:
 class FakePipeline:
     def __init__(self, name, jobs=None):
         self.name = name
-        self.jobs = jobs or {}
+        self.jobs = jobs or {"dummy": "content"}
 
 
 @pytest.fixture(autouse=True)
@@ -482,3 +482,44 @@ def test_dunder_main_handles_nonzero_exit(monkeypatch):
         runpy.run_module("pygha.__main__", run_name="__main__", alter_sys=True)
 
     assert exc.value.code == 2
+
+
+def test_build_skips_empty_default_pipeline_repro(tmp_path, monkeypatch):
+    """
+    Reproduces the bug: The CLI currently generates an empty 'ci.yml'
+    even if the user only defined 'pipe2'.
+    """
+    from pygha.registry import reset_registry, register_pipeline
+    from pygha.models import Job
+    from pygha.cli import main as cli_main
+
+    # Force registry to match production state (has empty 'ci' pipeline)
+    # The 'clean_registry' fixture normally wipes this, so we must restore it.
+    reset_registry()
+
+    # Add a second pipeline with a job (simulating user's @job(pipeline='pipe2'))
+    # 'ci' remains present but empty.
+    p2 = register_pipeline("pipe2")
+    p2.add_job(Job(name="setup_job"))
+
+    # Setup directories
+    src_dir = tmp_path / ".pipe"
+    out_dir = tmp_path / ".github" / "workflows"
+    src_dir.mkdir(parents=True)
+    out_dir.mkdir(parents=True)
+
+    # Create a dummy file so the CLI finds something to "run"
+    (src_dir / "pipeline_project.py").write_text("# code mocked above")
+
+    # Mock runpy to do nothing (since we manually populated the registry above)
+    monkeypatch.setattr("runpy.run_path", lambda path: None)
+
+    # Run the build command
+    cli_main(["build", "--src-dir", str(src_dir), "--out-dir", str(out_dir)])
+
+    # Assertions
+    # 'pipe2.yml' should exist (it has jobs)
+    assert (out_dir / "pipe2.yml").exists()
+
+    # 'ci.yml' should NOT exist (it is empty)
+    assert not (out_dir / "ci.yml").exists()

@@ -86,15 +86,20 @@ def cmd_build(
         print("[pygha] No pipelines registered.")
         return 0
 
-    for name, pipe in pipelines.items():
+    active_pipelines = {name: p for name, p in pipelines.items() if p.jobs}
+
+    if not active_pipelines:
+        print("[pygha] No jobs found in any registered pipeline.")
+
+    for name, pipe in active_pipelines.items():
         out_path = OUT_DIR / f"{name}.yml"
         out_path.write_text(GitHubTranspiler(pipe).to_yaml(), encoding="utf-8")
         print(f"[pygha] Wrote {out_path}")
 
     if clean:
-        _clean_orphaned(OUT_DIR, set(pipelines.keys()))
+        _clean_orphaned(OUT_DIR, set(active_pipelines.keys()))
 
-    print(f"\n✨ Done. {len(pipelines)} workflows written.")
+    print(f"\n✨ Done. {len(active_pipelines)} workflows written.")
     return 0
 
 

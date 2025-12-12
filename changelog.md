@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Decorator**: Fixed a bug where using the `@job` decorator without parentheses (e.g., `@job` instead of `@job()`) caused the job to be registered with an invalid name, crashing the YAML transpiler.
+- **CLI**: Fixed a bug where `pygha build` would generate empty workflow files (like `ci.yml`) for pipelines that had no jobs registered. Now, only pipelines with active jobs are transpiled to YAML.
 
 ## [0.2.0] - 2025-12-11
 
