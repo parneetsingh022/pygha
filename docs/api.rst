@@ -20,6 +20,19 @@ Core
    :members:
    :undoc-members:
 
+Core
+----
+... (existing content) ...
+
+.. autofunction:: pygha.decorators.run_if
+
+Conditionals
+------------
+
+.. automodule:: pygha.expr
+   :members:
+   :undoc-members:
+
 Steps
 -----
 
