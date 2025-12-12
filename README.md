@@ -96,4 +96,41 @@ def deploy():
     shell("twine check dist/*")
 ```
 
----
+## Advanced: Conditional Logic
+`pygha` allows you to write conditional workflows using Python syntax instead of raw YAML strings.
+
+### Job-Level Conditions
+Use the `@run_if` decorator to skip entire jobs based on context.
+```python
+from pygha.decorators import run_if
+from pygha.expr import github
+
+@job(name="nightly-scan")
+@run_if(github.event_name == "schedule")
+def security_scan():
+    """Only runs on scheduled events."""
+    ...
+```
+
+### Step-Level Conditions
+Use the `when` context manager to group steps that should only run under certain conditions. Nested conditions are automatically `AND`-ed together.
+
+```python
+from pygha.steps import when
+from pygha.expr import runner, always, failure
+
+@job
+def conditional_steps():
+    # Simple check
+    with when(runner.os == 'Linux'):
+        shell("sudo apt-get update")
+
+    # Status check helper (runs even if previous steps failed)
+    with when(always()):
+        shell("echo 'Cleanup...'")
+
+    # Nested check: (failure()) AND (runner.os == 'Linux')
+    with when(failure()):
+        with when(runner.os == 'Linux'):
+            shell("echo 'Linux build failed!'")
+```
