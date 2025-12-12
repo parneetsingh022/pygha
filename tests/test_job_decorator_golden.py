@@ -2,11 +2,17 @@ import pytest
 from pygha import job, pipeline, default_pipeline
 from pygha.steps import shell, checkout, echo
 from pygha.transpilers.github import GitHubTranspiler
-from pygha.registry import register_pipeline, reset_registry
+from pygha.registry import register_pipeline, reset_registry, get_default
 
 
 @pytest.fixture(autouse=True)
 def reset_pipeline_registry():
+    reset_registry()
+
+
+@pytest.fixture(autouse=True)
+def clean_registry():
+    """Ensure a clean registry for every test."""
     reset_registry()
 
 
@@ -185,3 +191,73 @@ def test_pipeline_mixed_dict_and_string(assert_matches_golden):
 
     out = GitHubTranspiler(mypipe).to_yaml()
     assert_matches_golden(out, "test_pipeline_mixed_dict_and_string.yml")
+
+
+def test_bare_job_decorator_registers_job():
+    """
+    Test that @job (without parentheses) correctly registers the function
+    using the function name as the job name.
+    """
+
+    # 1. Define a job with the bare decorator
+    @job
+    def bare_job():
+        echo("running bare job")
+
+    # 2. Verify it's in the default pipeline
+    pipe = get_default()
+    assert "bare_job" in pipe.jobs
+
+    # 3. Verify the job object properties
+    job_obj = pipe.jobs["bare_job"]
+    assert job_obj.name == "bare_job"
+    assert len(job_obj.steps) == 1
+    assert job_obj.steps[0].command == 'echo "running bare job"'
+
+
+def test_bare_job_decorator_transpilation():
+    """
+    Verify the final YAML output for a bare @job is correct and not empty.
+    """
+
+    @job
+    def setup_job():
+        echo("running setup job")
+        shell("python test.py")
+
+    pipe = get_default()
+    transpiler = GitHubTranspiler(pipe)
+    yaml_out = transpiler.to_yaml()
+
+    # Ensure we don't get "jobs: {}"
+    assert "setup_job:" in yaml_out
+    assert 'run: echo "running setup job"' in yaml_out
+    assert "run: python test.py" in yaml_out
+
+
+def test_job_decorator_empty_parens_still_works():
+    """
+    Regression test: Ensure @job() (with empty parentheses) still works.
+    """
+
+    @job()
+    def explicit_parens():
+        echo("I have parents")
+
+    pipe = get_default()
+    assert "explicit_parens" in pipe.jobs
+    assert pipe.jobs["explicit_parens"].name == "explicit_parens"
+
+
+def test_job_decorator_args_still_work():
+    """
+    Regression test: Ensure @job(name='custom') still works.
+    """
+
+    @job(name="custom-name")
+    def original_function_name():
+        pass
+
+    pipe = get_default()
+    assert "custom-name" in pipe.jobs
+    assert "original_function_name" not in pipe.jobs
