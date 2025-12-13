@@ -96,6 +96,24 @@ def deploy():
     shell("twine check dist/*")
 ```
 
+## Generating Workflows (CLI)
+
+Once you have defined your pipelines (by default, `pygha` looks for files matching `pipeline_*.py` or `*_pipeline.py` in a `.pipe` directory), use the CLI to generate the GitHub Actions YAML files.
+
+```bash
+# Default behavior: Scans .pipe/ and outputs to .github/workflows/
+pygha build
+```
+
+### Options
+* `--src-dir`: Source directory containing your Python pipeline definitions (default: .pipe).
+
+* `--out-dir`: Output directory where the generated YAML files will be saved (default: .github/workflows).
+
+* `--clean`: Automatically deletes YAML files in the output directory that are no longer registered in your pipelines. This is useful when you rename or remove pipelines.
+
+  > If you have a manually created workflow file in your output directory that you want to preserve (e.g., `manual-deploy.yml`), add `# pygha: keep` to the first 10 lines of that file. The CLI will skip deleting it.
+
 ## Advanced: Conditional Logic
 `pygha` allows you to write conditional workflows using Python syntax instead of raw YAML strings.
 
