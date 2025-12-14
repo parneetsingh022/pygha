@@ -88,21 +88,23 @@ def build():
 def cmd_init(src_dir: str = ".pipe") -> int:
     """Initialize a new pygha project with a sample pipeline file."""
     SRC_DIR = Path(src_dir)
+    pipeline_file = SRC_DIR / "ci_pipeline.py"
 
-    # Check if directory already exists
-    if SRC_DIR.exists():
-        # Check if pipeline.py already exists
-        pipeline_file = SRC_DIR / "pipeline.py"
-        if pipeline_file.exists():
-            print(f"\033[93m[pygha] Warning: {pipeline_file} already exists.\033[0m")
-            print("[pygha] Delete it manually if you want to reinitialize.")
-            return 1
+    # Check if src_dir is a file instead of directory
+    if SRC_DIR.exists() and SRC_DIR.is_file():
+        print(f"\033[91m[pygha] Error: {src_dir} is a file, not a directory.\033[0m")
+        return 1
+
+    # Check if pipeline file already exists
+    if pipeline_file.exists():
+        print(f"\033[93m[pygha] Warning: {pipeline_file} already exists.\033[0m")
+        print("[pygha] Delete it manually if you want to reinitialize.")
+        return 1
 
     # Create the directory
     SRC_DIR.mkdir(parents=True, exist_ok=True)
 
     # Write the sample pipeline file
-    pipeline_file = SRC_DIR / "pipeline.py"
     pipeline_file.write_text(PIPELINE_TEMPLATE, encoding="utf-8")
 
     print(f"\033[92m[pygha] Created {pipeline_file}\033[0m")
