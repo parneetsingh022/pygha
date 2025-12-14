@@ -523,3 +523,94 @@ def test_build_skips_empty_default_pipeline_repro(tmp_path, monkeypatch):
 
     # 'ci.yml' should NOT exist (it is empty)
     assert not (out_dir / "ci.yml").exists()
+
+
+# ---------- init command tests ----------
+
+
+def test_init_creates_pipe_directory_and_pipeline_file(tmp_path, capsys):
+    """Test that init creates the .pipe directory and pipeline.py file."""
+    src_dir = tmp_path / ".pipe"
+
+    # Ensure it doesn't exist yet
+    assert not src_dir.exists()
+
+    rc = cli_main(["init", "--src-dir", str(src_dir)])
+    assert rc == 0
+
+    # Directory should now exist
+    assert src_dir.exists()
+
+    # pipeline.py should exist with expected content
+    pipeline_file = src_dir / "pipeline.py"
+    assert pipeline_file.exists()
+
+    content = pipeline_file.read_text(encoding="utf-8")
+    assert "from pygha import job, default_pipeline" in content
+    assert "from pygha.steps import shell, checkout" in content
+    assert "@job" in content
+    assert "def build():" in content
+    assert 'checkout()' in content
+    assert 'shell("pip install .")' in content
+    assert 'shell("pytest")' in content
+
+    # Check success message
+    out = capsys.readouterr().out
+    assert "Created" in out
+    assert "pipeline.py" in out
+    assert "Next steps:" in out
+    assert "pygha build" in out
+
+
+def test_init_does_not_overwrite_existing_pipeline(tmp_path, capsys):
+    """Test that init refuses to overwrite an existing pipeline.py file."""
+    src_dir = tmp_path / ".pipe"
+    src_dir.mkdir(parents=True)
+
+    # Create an existing pipeline.py
+    pipeline_file = src_dir / "pipeline.py"
+    pipeline_file.write_text("# my custom pipeline\n", encoding="utf-8")
+
+    rc = cli_main(["init", "--src-dir", str(src_dir)])
+    assert rc == 1
+
+    # Original content should be unchanged
+    assert pipeline_file.read_text(encoding="utf-8") == "# my custom pipeline\n"
+
+    # Warning message should be printed
+    out = capsys.readouterr().out
+    assert "Warning" in out
+    assert "already exists" in out
+
+
+def test_init_creates_directory_if_not_exists(tmp_path, capsys):
+    """Test that init creates the directory even if it doesn't exist."""
+    src_dir = tmp_path / "my_custom_pipe_dir"
+
+    # Ensure it doesn't exist
+    assert not src_dir.exists()
+
+    rc = cli_main(["init", "--src-dir", str(src_dir)])
+    assert rc == 0
+
+    # Both directory and file should exist
+    assert src_dir.exists()
+    assert (src_dir / "pipeline.py").exists()
+
+
+def test_main_dispatches_to_cmd_init(monkeypatch, tmp_path):
+    """Test that main correctly dispatches to cmd_init."""
+    import pygha.cli as cli
+
+    called = {}
+
+    def fake_cmd_init(src_dir):
+        called["src_dir"] = src_dir
+        return 42  # sentinel
+
+    monkeypatch.setattr(cli, "cmd_init", fake_cmd_init)
+
+    rc = cli_main(["init", "--src-dir", str(tmp_path / "custom")])
+
+    assert rc == 42
+    assert called == {"src_dir": str(tmp_path / "custom")}
