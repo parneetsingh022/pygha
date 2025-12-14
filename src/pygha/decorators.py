@@ -46,6 +46,9 @@ def job(
         else:
             raise TypeError("pipeline must be None, a str, or a Pipeline")
 
+        if timeout_minutes is not None and timeout_minutes <= 0:
+            raise ValueError("timeout_minutes must be a positive integer")
+
         job_obj = Job(
             name=jname,
             depends_on=set(depends_on or []),

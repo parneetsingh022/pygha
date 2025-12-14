@@ -72,7 +72,7 @@ class Job:
     timeout_minutes: int | None = None
     """
     (Optional) The maximum number of minutes to let a job run before GitHub
-    automatically cancels it. Defaults to 360 (6 hours) if not specified.
+    automatically cancels it. Defaults to None, which implies GitHub's default of 360 minutes.
     """
 
     if_condition: str | None = None
