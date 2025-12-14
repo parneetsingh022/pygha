@@ -598,6 +598,33 @@ def test_init_creates_directory_if_not_exists(tmp_path, capsys):
     assert (src_dir / "pipeline.py").exists()
 
 
+def test_init_creates_pipeline_in_existing_empty_directory(tmp_path, capsys):
+    """Test that init creates pipeline.py in an existing empty directory.
+
+    This covers the branch where the directory exists but pipeline.py doesn't.
+    """
+    src_dir = tmp_path / ".pipe"
+    src_dir.mkdir(parents=True)
+
+    # Directory exists but no pipeline.py
+    assert src_dir.exists()
+    assert not (src_dir / "pipeline.py").exists()
+
+    rc = cli_main(["init", "--src-dir", str(src_dir)])
+    assert rc == 0
+
+    # pipeline.py should now exist with expected content
+    pipeline_file = src_dir / "pipeline.py"
+    assert pipeline_file.exists()
+
+    content = pipeline_file.read_text(encoding="utf-8")
+    assert "from pygha import job, default_pipeline" in content
+
+    # Check success message
+    out = capsys.readouterr().out
+    assert "Created" in out
+
+
 def test_main_dispatches_to_cmd_init(monkeypatch, tmp_path):
     """Test that main correctly dispatches to cmd_init."""
     import pygha.cli as cli
