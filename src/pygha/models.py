@@ -69,6 +69,12 @@ class Job:
     If None, GitHub Actions defaults this to true.
     """
 
+    timeout_minutes: int | None = None
+    """
+    (Optional) The maximum number of minutes to let a job run before GitHub
+    automatically cancels it. Defaults to 360 (6 hours) if not specified.
+    """
+
     if_condition: str | None = None
 
     def add_step(self, step: Step) -> None:

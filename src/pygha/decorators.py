@@ -28,6 +28,7 @@ def job(
     runs_on: str | None = "ubuntu-latest",
     matrix: dict[str, list[Any]] | None = None,
     fail_fast: bool | None = None,
+    timeout_minutes: int | None = None,
 ) -> Callable[[Callable[[], R]], Callable[[], R]] | Callable[[], R]:
     """Decorator to define a job (expects a no-arg function)."""
 
@@ -51,6 +52,7 @@ def job(
             runner_image=runs_on,
             matrix=matrix,
             fail_fast=fail_fast,
+            timeout_minutes=timeout_minutes,
             if_condition=condition,
         )
 
