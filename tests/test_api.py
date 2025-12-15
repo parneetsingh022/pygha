@@ -9,7 +9,7 @@ from pygha.steps.builtin import RunShellStep, CheckoutStep
 def test_shell_appends_step_and_returns_it():
     job = Job(name="build")
     with active_job(job):
-        step = shell("echo hi")
+        step = shell("echo hi...")
 
     # correct type and placement
     assert isinstance(step, RunShellStep)
