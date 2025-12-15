@@ -171,6 +171,24 @@ To let all jobs finish regardless of failure, set ``fail_fast=False``.
    def long_running_test():
        shell("./run_tests.sh --shard ${{ matrix.shard }}")
 
+Job Timeout
+~~~~~~~~~~~
+
+You can limit how long a job is allowed to run using the ``timeout_minutes`` parameter.
+If the job exceeds this limit, it will be automatically cancelled.
+
+.. code-block:: python
+
+   @job(timeout_minutes=30)
+   def build():
+       shell("make build")
+
+   @job(timeout_minutes=60, depends_on=["build"])
+   def test():
+       shell("pytest")
+
+If not specified, the platform's default timeout applies (360 minutes for GitHub Actions).
+
 Complex Matrices (Include/Exclude)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

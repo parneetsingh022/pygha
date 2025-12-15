@@ -30,6 +30,9 @@ class GitHubTranspiler:
             if job.if_condition:
                 job_dict["if"] = job.if_condition
 
+            if job.timeout_minutes is not None:
+                job_dict["timeout-minutes"] = job.timeout_minutes
+
             if job.matrix:
                 strategy: dict[str, Any] = {"matrix": job.matrix}
 

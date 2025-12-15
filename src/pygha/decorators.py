@@ -28,6 +28,7 @@ def job(
     runs_on: str | None = "ubuntu-latest",
     matrix: dict[str, list[Any]] | None = None,
     fail_fast: bool | None = None,
+    timeout_minutes: int | None = None,
 ) -> Callable[[Callable[[], R]], Callable[[], R]] | Callable[[], R]:
     """Decorator to define a job (expects a no-arg function)."""
 
@@ -45,12 +46,16 @@ def job(
         else:
             raise TypeError("pipeline must be None, a str, or a Pipeline")
 
+        if timeout_minutes is not None and timeout_minutes <= 0:
+            raise ValueError("timeout_minutes must be a positive integer")
+
         job_obj = Job(
             name=jname,
             depends_on=set(depends_on or []),
             runner_image=runs_on,
             matrix=matrix,
             fail_fast=fail_fast,
+            timeout_minutes=timeout_minutes,
             if_condition=condition,
         )
 

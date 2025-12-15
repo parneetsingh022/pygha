@@ -261,3 +261,65 @@ def test_job_decorator_args_still_work():
     pipe = get_default()
     assert "custom-name" in pipe.jobs
     assert "original_function_name" not in pipe.jobs
+
+
+def test_job_with_timeout_minutes(assert_matches_golden):
+    """
+    Test that timeout_minutes is correctly transpiled to timeout-minutes in YAML.
+    """
+    mypipe = pipeline(
+        name="test_job_with_timeout_minutes",
+        on_push="main",
+    )
+
+    @job(name="build", pipeline=mypipe, timeout_minutes=30)
+    def build_job():
+        shell("make build")
+
+    @job(name="test", pipeline=mypipe, depends_on=["build"], timeout_minutes=60)
+    def test_job():
+        shell("pytest")
+
+    out = GitHubTranspiler(mypipe).to_yaml()
+    assert_matches_golden(out, "test_job_with_timeout_minutes.yml")
+
+
+def test_job_without_timeout_minutes_has_no_field():
+    """
+    Test that jobs without timeout_minutes don't have the field in YAML.
+    """
+    from ruamel.yaml import YAML
+
+    mypipe = pipeline(
+        name="test_no_timeout",
+        on_push="main",
+    )
+
+    @job(name="build", pipeline=mypipe)
+    def build_job():
+        shell("make build")
+
+    out = GitHubTranspiler(mypipe).to_yaml()
+    yaml = YAML(typ="safe")
+    data = yaml.load(out)
+    assert "timeout-minutes" not in data["jobs"]["build"]
+
+
+def test_job_with_invalid_timeout_minutes_raises():
+    """
+    Test that invalid timeout_minutes values raise ValueError.
+    """
+    mypipe = pipeline(
+        name="test_invalid_timeout",
+        on_push="main",
+    )
+
+    with pytest.raises(ValueError, match="timeout_minutes must be a positive integer"):
+        @job(name="build", pipeline=mypipe, timeout_minutes=0)
+        def build_job():
+            shell("make build")
+
+    with pytest.raises(ValueError, match="timeout_minutes must be a positive integer"):
+        @job(name="test", pipeline=mypipe, timeout_minutes=-10)
+        def test_job():
+            shell("pytest")
