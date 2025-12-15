@@ -84,6 +84,7 @@ def test_build_generates_one_file_per_pipeline(tmp_path, monkeypatch, fake_trans
     out = capsys.readouterr().out
     assert "Found 2 pipeline files" in out
     assert "Wrote" in out
+    assert 1 == 1
 
 
 def test_build_clean_removes_orphans_but_keeps_marked(tmp_path, monkeypatch, fake_transpiler):
