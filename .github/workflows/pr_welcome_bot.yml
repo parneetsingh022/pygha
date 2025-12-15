@@ -1,0 +1,68 @@
+name: PR Welcome Bot
+
+on:
+  pull_request_target:
+    types: [opened, synchronize] # Runs on open and when new commits are pushed (optional)
+
+permissions:
+  pull-requests: write
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post Welcome Message
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // 1. Setup variables
+            const author = context.payload.pull_request.user.login;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = context.payload.pull_request.number;
+            
+            // 2. Fetch the list of files changed in this PR
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner,
+              repo,
+              pull_number: prNumber,
+            });
+
+            // 3. Analyze the files
+            const hasTests = files.some(f => f.filename.startsWith('tests/'));
+            const hasDocs = files.some(f => f.filename.startsWith('docs/'));
+            const hasChangelog = files.some(f => f.filename.toLowerCase().includes('changelog.md'));
+
+            // 4. Build the dynamic reminders
+            let reminders = [];
+            
+            if (!hasTests) {
+              reminders.push("- ⚠️ **Tests:** I noticed you didn't update any files in `tests/`. If this PR modifies code logic, please ensure relevant tests are added or updated.");
+            }
+            if (!hasDocs) {
+              reminders.push("- 📚 **Docs:** I didn't see any changes to the `docs/` folder. If this adds a new feature or changes behavior, please remember to update the documentation.");
+            }
+            if (!hasChangelog) {
+              reminders.push(`- 📝 **Changelog:** The \`changelog.md\` file wasn't touched. If this is a user-facing change, please [add an entry](https://github.com/${owner}/${repo}/blob/main/changelog.md).`);
+            }
+
+            // 5. Construct the final message
+            let body = `Hi @${author}, this is the **PyGHA bot**! 🤖\n\n`;
+            body += `Thanks for your contribution! We will review your changes and get back to you soon.\n\n`;
+            
+            if (reminders.length > 0) {
+              body += `### Just a quick reminder:\n`;
+              body += `I noticed a few things that *might* be missing (but ignore this if they aren't required for your specific change):\n`;
+              body += reminders.join("\n");
+              body += "\n\n";
+            }
+
+            body += `Please make sure you've read our [Contributing Guidelines](https://github.com/${owner}/${repo}/blob/main/CONTRIBUTING.md).\n\n`;
+            body += `_By contributing, you agree that your contributions will be licensed under the MIT License._`;
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: prNumber,
+              body: body
+            });
