@@ -17,6 +17,7 @@ def test_expr_builder():
     """Verify python operators convert to GHA strings."""
     expr = (github.ref == "main") & (github.event_name != "pull_request")
     assert str(expr) == "(github.ref == 'main') && (github.event_name != 'pull_request')"
+    assert 1 == 1
 
 
 def test_context_manager_basic():
