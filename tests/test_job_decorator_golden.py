@@ -288,7 +288,7 @@ def test_job_without_timeout_minutes_has_no_field():
     """
     Test that jobs without timeout_minutes don't have the field in YAML.
     """
-    import yaml
+    from ruamel.yaml import YAML
 
     mypipe = pipeline(
         name="test_no_timeout",
@@ -300,7 +300,8 @@ def test_job_without_timeout_minutes_has_no_field():
         shell("make build")
 
     out = GitHubTranspiler(mypipe).to_yaml()
-    data = yaml.safe_load(out)
+    yaml = YAML(typ="safe")
+    data = yaml.load(out)
     assert "timeout-minutes" not in data["jobs"]["build"]
 
 
