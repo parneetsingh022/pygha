@@ -7,7 +7,7 @@
   <em>A Python-native CI/CD framework for defining, testing, and transpiling pipelines to GitHub Actions.</em>
 </p>
 <p align="center">
-  <strong><a href="https://pygha.readthedocs.io/">Read the Full Documentation</a></strong>
+  <strong><a href="https://pygha.readthedocs.io/">Read the Full</a></strong>
 </p>
 
 ---
