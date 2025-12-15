@@ -1,20 +1,54 @@
 Command Line Interface
 =========================
 
-The :mod:`pygha.cli` module exposes a ``pygha`` console script with a
-single ``build`` sub-command.  It scans a source directory for pipeline
-files, executes them to populate the registry, and transpiles each
-registered pipeline to GitHub Actions YAML.
+The :mod:`pygha.cli` module exposes a ``pygha`` console script with
+sub-commands for initializing and building pipelines.
 
-Usage
+Commands
 --------
+
+init
+~~~~
+
+Scaffolds a new pygha project by creating a sample pipeline file.
+
+.. code-block:: console
+
+   $ pygha init                    # Creates .pipe/ci_pipeline.py
+   $ pygha init --src-dir custom   # Creates custom/ci_pipeline.py
+
+The generated ``ci_pipeline.py`` includes a minimal working configuration:
+
+.. code-block:: python
+
+   from pygha import job, default_pipeline
+   from pygha.steps import shell, checkout
+
+   default_pipeline(on_push=["main"], on_pull_request=True)
+
+   @job
+   def build():
+       checkout()
+       shell("pip install .")
+       shell("pytest")
+
+**Options**
+
+``--src-dir``
+   Defaults to ``.pipe``.  The directory where the sample pipeline file
+   will be created.
+
+build
+~~~~~
+
+Scans a source directory for pipeline files, executes them to populate
+the registry, and transpiles each registered pipeline to GitHub Actions YAML.
 
 .. code-block:: console
 
    $ pygha build --src-dir .pipe --out-dir .github/workflows --clean
 
-Options
-----------
+**Options**
 
 ``--src-dir``
    Defaults to ``.pipe``.  Every file matching ``pipeline_*.py`` or
@@ -29,10 +63,9 @@ Options
    start with ``# pygha: keep`` within the first ten lines.  This is a
    useful safety valve when rotating pipelines.
 
-Exit status
--------------
+**Exit status**
 
-``cmd_build`` returns ``0`` even when no pipelines were registered so the
-command is safe to run in empty repositories.  Any exception raised while
-executing a pipeline file or running the transpiler will propagate to the
-caller, giving CI runners immediate feedback.
+Returns ``0`` even when no pipelines were registered so the command is
+safe to run in empty repositories.  Any exception raised while executing
+a pipeline file or running the transpiler will propagate to the caller,
+giving CI runners immediate feedback.
