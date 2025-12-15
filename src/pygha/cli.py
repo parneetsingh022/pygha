@@ -68,6 +68,55 @@ def _clean_orphaned(out_dir: Path, valid_names: set[str]) -> None:
             print(f"\033[93m[pygha] Warning: could not remove {f} (permissions?)\033[0m")
 
 
+# The default pipeline template for `pygha init`
+PIPELINE_TEMPLATE = '''\
+from pygha import job, default_pipeline
+from pygha.steps import shell, checkout
+
+# 1. Configure the default 'ci' pipeline
+default_pipeline(on_push=["main"], on_pull_request=True)
+
+# 2. Define a simple job
+@job
+def build():
+    checkout()
+    shell("pip install .")
+    shell("pytest")
+'''
+
+
+def cmd_init(src_dir: str = ".pipe") -> int:
+    """Initialize a new pygha project with a sample pipeline file."""
+    SRC_DIR = Path(src_dir)
+    pipeline_file = SRC_DIR / "ci_pipeline.py"
+
+    # Check if src_dir is a file instead of directory
+    if SRC_DIR.exists() and SRC_DIR.is_file():
+        print(f"\033[91m[pygha] Error: {src_dir} is a file, not a directory.\033[0m")
+        return 1
+
+    # Check if pipeline file already exists
+    if pipeline_file.exists():
+        print(f"\033[93m[pygha] Warning: {pipeline_file} already exists.\033[0m")
+        print("[pygha] Delete it manually if you want to reinitialize.")
+        return 1
+
+    # Create the directory
+    SRC_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Write the sample pipeline file
+    pipeline_file.write_text(PIPELINE_TEMPLATE, encoding="utf-8")
+
+    print(f"\033[92m[pygha] Created {pipeline_file}\033[0m")
+    print()
+    print("Next steps:")
+    print(f"  1. Edit {pipeline_file} to define your pipeline")
+    print("  2. Run 'pygha build' to generate GitHub Actions workflows")
+    print()
+    print("✨ Happy building!")
+    return 0
+
+
 def cmd_build(
     src_dir: str = ".pipe", out_dir: str = ".github/workflows", clean: bool = False
 ) -> int:
@@ -109,6 +158,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="pygha", description="pygha CLI")
     sub = parser.add_subparsers(dest="command", required=True)
 
+    # Init subcommand
+    p_init = sub.add_parser("init", help="Initialize a new pygha project")
+    p_init.add_argument(
+        "--src-dir", default=".pipe", help="Where to create the pipeline file"
+    )
+
+    # Build subcommand
     p_build = sub.add_parser("build", help="Generate GitHub Actions workflows")
     p_build.add_argument("--src-dir", default=".pipe", help="Where pipeline_*.py live")
     p_build.add_argument("--out-dir", default=".github/workflows", help="Where to write .yml")
@@ -119,6 +175,8 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     args = parser.parse_args(argv)
-    if args.command == "build":
+    if args.command == "init":
+        return cmd_init(args.src_dir)
+    elif args.command == "build":
         return cmd_build(args.src_dir, args.out_dir, args.clean)
     return 0
