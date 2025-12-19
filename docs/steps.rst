@@ -30,6 +30,14 @@ Builtin helpers
    Convenience wrapper that calls :func:`shell` with
    ``echo "message"`` for quick debugging statements.
 
+``setup_python(version, action_version="v5", cache=None, name="Setup Python")``
+   Wraps :class:`pygha.steps.builtin.UsesStep` to specifically configure the
+   ``actions/setup-python`` action.
+
+   - **version**: The Python version to install (e.g., ``"3.12"``).
+   - **cache**: Optional package manager to cache (e.g., ``"pip"``).
+   - **action_version**: The version tag of the GitHub Action (defaults to ``"v5"``).
+
 Example job
 --------------
 
@@ -42,8 +50,7 @@ Example job
    def lint_and_test():
        checkout()
 
-       # Use a marketplace action to setup Python
-       uses("actions/setup-python@v5", with_args={"python-version": "3.12"})
+       setup_python("3.12", cache="pip")
 
        echo("Installing dependencies")
        shell("pip install -r requirements.txt", name="install")
