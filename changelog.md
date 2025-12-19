@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#47]: https://github.com/parneetsingh022/pygha/pull/47
 [#48]: https://github.com/parneetsingh022/pygha/pull/48
 [#50]: https://github.com/parneetsingh022/pygha/issues/50
+[#65]: https://github.com/parneetsingh022/pygha/issues/50
 
 ## [0.2.1] - 2025-12-12
 
