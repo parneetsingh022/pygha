@@ -656,3 +656,17 @@ def test_main_dispatches_to_cmd_init(monkeypatch, tmp_path):
 
     assert rc == 42
     assert called == {"src_dir": str(tmp_path / "custom")}
+def test_cli_version_flag(capsys):
+    # 1. Wrap the call in a context manager that expects a SystemExit
+    with pytest.raises(SystemExit):
+        # Call the main function with the version flag
+        cli_main(["--version"])
+    
+    # 2. Capture the output from the console
+    captured = capsys.readouterr()
+    
+    # 3. Assert that the output contains the program name and version
+    assert "pygha" in captured.out
+    # Check that the actual version number is also in the output
+    from pygha import __version__
+    assert __version__ in captured.out

@@ -8,6 +8,7 @@ from re import Pattern
 from pygha.transpilers.github import GitHubTranspiler
 from pygha import registry
 from pygha.models import Pipeline
+from . import __version__
 
 # Match variations like:
 # "# pygha: keep", "#pygha: keep", "#pygha : keep", any spacing/case
@@ -156,6 +157,7 @@ def main(argv: list[str] | None = None) -> int:
     import argparse
 
     parser = argparse.ArgumentParser(prog="pygha", description="pygha CLI")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
 
     # Init subcommand
