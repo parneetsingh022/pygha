@@ -4,6 +4,12 @@ Command Line Interface
 The :mod:`pygha.cli` module exposes a ``pygha`` console script with
 sub-commands for initializing and building pipelines.
 
+Options
+-------
+
+``--version``
+   Show the version number and exit.
+
 Commands
 --------
 
