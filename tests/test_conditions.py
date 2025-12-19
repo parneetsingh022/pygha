@@ -1,6 +1,6 @@
 import pytest
 from pygha import job
-from pygha.steps import shell, checkout, when, uses
+from pygha.steps import run, checkout, when, uses
 from pygha.decorators import run_if
 from pygha.expr import github, always, failure
 from pygha.transpilers.github import GitHubTranspiler
@@ -25,8 +25,8 @@ def test_context_manager_basic():
     @job(name="test")
     def my_job():
         with when("runner.os == 'Linux'"):
-            shell("echo linux")
-        shell("echo always")
+            run("echo linux")
+        run("echo always")
 
     # Manually inspect the pipeline
     from pygha.registry import get_default
@@ -44,7 +44,7 @@ def test_context_manager_nested():
     def my_job():
         with when("A"):
             with when("B"):
-                shell("echo nested")
+                run("echo nested")
 
     from pygha.registry import get_default
 
@@ -89,11 +89,11 @@ def test_sibling_when_blocks():
     def my_job():
         # Block A
         with when("A"):
-            shell("step 1")
+            run("step 1")
 
         # Block B (Should NOT have A)
         with when("B"):
-            shell("step 2")
+            run("step 2")
 
     from pygha.registry import get_default
 
@@ -161,35 +161,35 @@ def test_full_yaml_output(assert_matches_golden):
 
         # Scenario 2: Simple comparison
         with when(runner.os == "Linux"):
-            shell("echo 'Running on Linux'")
+            run("echo 'Running on Linux'")
 
         # Scenario 4: Complex OR logic with string comparisons
         with when((github.ref == "refs/heads/main") | (github.event_name == "schedule")):
-            shell("echo 'Prod or Schedule'")
+            run("echo 'Prod or Schedule'")
 
         # Scenario 3: Nested conditions (Implicit AND)
         with when(env.DEPLOY_ENV != "production"):
-            shell("echo 'Not production'")
+            run("echo 'Not production'")
 
             # This step inherits the outer condition + its own
             with when(success()):
-                shell("echo 'Previous steps succeeded AND not prod'")
+                run("echo 'Previous steps succeeded AND not prod'")
 
         # Scenario 4: Negation (NOT)
         with when(~(github.actor == "dependabot")):
-            shell("echo 'Not a bot'")
+            run("echo 'Not a bot'")
 
         # Scenario 4: Complex AND logic
         with when((github.actor == "admin") & (runner.arch == "X64")):
-            shell("echo 'Admin on X64'")
+            run("echo 'Admin on X64'")
 
         # Scenario 6: Function helper (always runs even if previous failed)
         with when(always()):
-            shell("echo 'Cleanup or finalize'")
+            run("echo 'Cleanup or finalize'")
 
         # Scenario 6: Failure check
         with when(failure()):
-            shell("echo 'Something failed earlier'")
+            run("echo 'Something failed earlier'")
 
     tr = GitHubTranspiler()
     assert_matches_golden(tr.to_yaml(), "test_conditions.yml")

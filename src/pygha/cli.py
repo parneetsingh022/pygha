@@ -69,9 +69,9 @@ def _clean_orphaned(out_dir: Path, valid_names: set[str]) -> None:
 
 
 # The default pipeline template for `pygha init`
-PIPELINE_TEMPLATE = '''\
+PIPELINE_TEMPLATE = """\
 from pygha import job, default_pipeline
-from pygha.steps import shell, checkout
+from pygha.steps import run, checkout
 
 # 1. Configure the default 'ci' pipeline
 default_pipeline(on_push=["main"], on_pull_request=True)
@@ -80,9 +80,9 @@ default_pipeline(on_push=["main"], on_pull_request=True)
 @job
 def build():
     checkout()
-    shell("pip install .")
-    shell("pytest")
-'''
+    run("pip install .")
+    run("pytest")
+"""
 
 
 def cmd_init(src_dir: str = ".pipe") -> int:
@@ -160,9 +160,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # Init subcommand
     p_init = sub.add_parser("init", help="Initialize a new pygha project")
-    p_init.add_argument(
-        "--src-dir", default=".pipe", help="Where to create the pipeline file"
-    )
+    p_init.add_argument("--src-dir", default=".pipe", help="Where to create the pipeline file")
 
     # Build subcommand
     p_build = sub.add_parser("build", help="Generate GitHub Actions workflows")

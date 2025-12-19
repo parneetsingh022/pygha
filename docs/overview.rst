@@ -18,13 +18,13 @@ usually consists of at least one ``@job`` function:
 .. code-block:: python
 
    from pygha import job
-   from pygha.steps import shell, checkout
+   from pygha.steps import run, checkout
 
    @job
    def build():
        checkout()
-       shell("pip install -r requirements.txt")
-       shell("pytest --maxfail=1")
+       run("pip install -r requirements.txt")
+       run("pytest --maxfail=1")
 
    if __name__ == "__main__":
        # ensure the pipeline exists and optionally tweak triggers
@@ -96,7 +96,7 @@ To assign a job to a specific pipeline, pass the pipeline object or its name to 
 .. code-block:: python
 
    from pygha import pipeline, job
-   from pygha.steps import shell
+   from pygha.steps import run
 
    # 1. Define or retrieve the pipelines
    # 'ci' is the default, but we can configure it explicitly here
@@ -107,12 +107,12 @@ To assign a job to a specific pipeline, pass the pipeline object or its name to 
    # 2. Assign jobs to the 'ci' pipeline (default if pipeline arg is omitted)
    @job(pipeline=ci)
    def test():
-       shell("pytest")
+       run("pytest")
 
    # 3. Assign jobs to the 'release' pipeline
    @job(pipeline=release)
    def publish():
-       shell("twine upload dist/*")
+       run("twine upload dist/*")
 
 The CLI will generate a separate YAML file for each registered pipeline (e.g., ``ci.yml`` and ``release.yml``).
 
@@ -133,12 +133,12 @@ In this example, the ``test`` job runs three times, once for each Python version
 .. code-block:: python
 
    from pygha import job
-   from pygha.steps import shell
+   from pygha.steps import run
 
    @job(matrix={"python": ["3.11", "3.12", "3.13"]})
    def test():
        # Access the matrix context in your shell commands
-       shell("echo Running tests on Python ${{ matrix.python }}")
+       run("echo Running tests on Python ${{ matrix.python }}")
 
 Dynamic Runners (OS Matrix)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -154,7 +154,7 @@ for cross-platform testing.
        matrix={"os": ["ubuntu-latest", "macos-latest", "windows-latest"]}
    )
    def build_os():
-       shell("echo Building on ${{ matrix.os }}")
+       run("echo Building on ${{ matrix.os }}")
 
 Fail Fast
 ~~~~~~~~~
@@ -169,7 +169,7 @@ To let all jobs finish regardless of failure, set ``fail_fast=False``.
        fail_fast=False
    )
    def long_running_test():
-       shell("./run_tests.sh --shard ${{ matrix.shard }}")
+       run("./run_tests.sh --shard ${{ matrix.shard }}")
 
 Job Timeout
 ~~~~~~~~~~~
@@ -181,11 +181,11 @@ If the job exceeds this limit, it will be automatically cancelled.
 
    @job(timeout_minutes=30)
    def build():
-       shell("make build")
+       run("make build")
 
    @job(timeout_minutes=60, depends_on=["build"])
    def test():
-       shell("pytest")
+       run("pytest")
 
 If not specified, the platform's default timeout applies (360 minutes for GitHub Actions).
 

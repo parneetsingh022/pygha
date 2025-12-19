@@ -64,7 +64,7 @@ build, lint, test, coverage, and deploy — all orchestrated through `pygha`.
 
 ```python
 from pygha import job, default_pipeline
-from pygha.steps import shell, checkout, uses
+from pygha.steps import run, checkout, uses
 
 # Configure the default pipeline to run on main push and PRs
 default_pipeline(on_push=["main"], on_pull_request=True)
@@ -83,8 +83,8 @@ def test_matrix():
         with_args={"python-version": "${{ matrix.python }}"}
     )
 
-    shell("pip install .[dev]")
-    shell("pytest")
+    run("pip install .[dev]")
+    run("pytest")
 
 @job(name="deploy", depends_on=["test"])
 def deploy():
@@ -92,9 +92,9 @@ def deploy():
     checkout()
     uses("actions/setup-python@v5", with_args={"python-version": "3.11"})
 
-    shell("pip install build twine")
-    shell("python -m build")
-    shell("twine check dist/*")
+    run("pip install build twine")
+    run("python -m build")
+    run("twine check dist/*")
 ```
 
 ## Generating Workflows (CLI)
@@ -142,14 +142,14 @@ from pygha.expr import runner, always, failure
 def conditional_steps():
     # Simple check
     with when(runner.os == 'Linux'):
-        shell("sudo apt-get update")
+        run("sudo apt-get update")
 
     # Status check helper (runs even if previous steps failed)
     with when(always()):
-        shell("echo 'Cleanup...'")
+        run("echo 'Cleanup...'")
 
     # Nested check: (failure()) AND (runner.os == 'Linux')
     with when(failure()):
         with when(runner.os == 'Linux'):
-            shell("echo 'Linux build failed!'")
+            run("echo 'Linux build failed!'")
 ```

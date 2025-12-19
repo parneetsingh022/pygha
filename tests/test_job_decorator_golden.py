@@ -1,6 +1,6 @@
 import pytest
 from pygha import job, pipeline, default_pipeline
-from pygha.steps import shell, checkout, echo
+from pygha.steps import run, checkout, echo
 from pygha.transpilers.github import GitHubTranspiler
 from pygha.registry import register_pipeline, reset_registry, get_default
 
@@ -29,17 +29,17 @@ def test_job_decorator_basic(assert_matches_golden):
     def build_job():
         checkout()
         echo("Building project...")
-        shell("make build")
+        run("make build")
 
     @job(name="test", depends_on=["build"], pipeline=pipeline_name)
     def test_job():
         echo("Running tests...")
-        shell("pytest -v")
+        run("pytest -v")
 
     @job(name="with-name", pipeline=pipeline_name)
     def with_name():
         checkout(name="Checkout with name")
-        shell("python with_name.py", name="Run Python Script")
+        run("python with_name.py", name="Run Python Script")
         echo("This is echo test with name", name="Echo name test")
 
     # retrieve the pipeline we decorated into
@@ -85,7 +85,7 @@ def test_pipeline_creation_with_push(assert_matches_golden):
 
     @job(name="build", pipeline=mypipe)
     def initial_job():
-        shell("pip install pygha")
+        run("pip install pygha")
 
     out = GitHubTranspiler(mypipe).to_yaml()
 
@@ -100,7 +100,7 @@ def test_pipeline_creation_with_pr(assert_matches_golden):
 
     @job(name="build", pipeline=mypipe)
     def initial_job():
-        shell("pip install pygha")
+        run("pip install pygha")
 
     out = GitHubTranspiler(mypipe).to_yaml()
 
@@ -116,7 +116,7 @@ def test_pipeline_creation_with_bool(assert_matches_golden):
 
     @job(name="build", pipeline=mypipe)
     def initial_job():
-        shell("pip install pygha")
+        run("pip install pygha")
 
     out = GitHubTranspiler(mypipe).to_yaml()
 
@@ -132,7 +132,7 @@ def test_pipeline_creation_with_dict_triggers(assert_matches_golden):
 
     @job(name="build", pipeline=mypipe)
     def build_job():
-        shell("pip install pygha")
+        run("pip install pygha")
 
     out = GitHubTranspiler(mypipe).to_yaml()
     assert_matches_golden(out, "test_pipeline_creation_with_dict_triggers.yml")
@@ -143,7 +143,7 @@ def test_pipeline_default_when_no_triggers(assert_matches_golden):
 
     @job(name="build", pipeline=mypipe)
     def build_job():
-        shell("pip install pygha")
+        run("pip install pygha")
 
     out = GitHubTranspiler(mypipe).to_yaml()
     assert_matches_golden(out, "test_pipeline_default_when_no_triggers.yml")
@@ -158,7 +158,7 @@ def test_pipeline_disable_push_with_empty_list(assert_matches_golden):
 
     @job(name="build", pipeline=mypipe)
     def build_job():
-        shell("pip install pygha")
+        run("pip install pygha")
 
     out = GitHubTranspiler(mypipe).to_yaml()
     assert_matches_golden(out, "test_pipeline_disable_push_with_empty_list.yml")
@@ -187,7 +187,7 @@ def test_pipeline_mixed_dict_and_string(assert_matches_golden):
 
     @job(name="build", pipeline=mypipe)
     def build_job():
-        shell("pip install pygha")
+        run("pip install pygha")
 
     out = GitHubTranspiler(mypipe).to_yaml()
     assert_matches_golden(out, "test_pipeline_mixed_dict_and_string.yml")
@@ -223,7 +223,7 @@ def test_bare_job_decorator_transpilation():
     @job
     def setup_job():
         echo("running setup job")
-        shell("python test.py")
+        run("python test.py")
 
     pipe = get_default()
     transpiler = GitHubTranspiler(pipe)
@@ -274,11 +274,11 @@ def test_job_with_timeout_minutes(assert_matches_golden):
 
     @job(name="build", pipeline=mypipe, timeout_minutes=30)
     def build_job():
-        shell("make build")
+        run("make build")
 
     @job(name="test", pipeline=mypipe, depends_on=["build"], timeout_minutes=60)
     def test_job():
-        shell("pytest")
+        run("pytest")
 
     out = GitHubTranspiler(mypipe).to_yaml()
     assert_matches_golden(out, "test_job_with_timeout_minutes.yml")
@@ -297,7 +297,7 @@ def test_job_without_timeout_minutes_has_no_field():
 
     @job(name="build", pipeline=mypipe)
     def build_job():
-        shell("make build")
+        run("make build")
 
     out = GitHubTranspiler(mypipe).to_yaml()
     yaml = YAML(typ="safe")
@@ -315,11 +315,13 @@ def test_job_with_invalid_timeout_minutes_raises():
     )
 
     with pytest.raises(ValueError, match="timeout_minutes must be a positive integer"):
+
         @job(name="build", pipeline=mypipe, timeout_minutes=0)
         def build_job():
-            shell("make build")
+            run("make build")
 
     with pytest.raises(ValueError, match="timeout_minutes must be a positive integer"):
+
         @job(name="test", pipeline=mypipe, timeout_minutes=-10)
         def test_job():
-            shell("pytest")
+            run("pytest")

@@ -6,7 +6,7 @@ from pygha.steps.builtin import RunShellStep, CheckoutStep
 from pygha.models import Job, Pipeline
 import pytest
 
-from pygha.steps import shell, checkout, echo, active_job
+from pygha.steps import run, checkout, echo, active_job
 
 
 def _build_pipeline_basic() -> Pipeline:
@@ -145,7 +145,7 @@ def test_to_yaml_pretty_and_key_order():
     assert "\n      - name:" not in out
 
 
-######################## Run Shell Step ######################
+######################## Run run Step ######################
 
 
 def test_shell_basic_to_github_dict():
@@ -242,7 +242,7 @@ def test_echo_named(monkeypatch):
 
 def test_api_shell_requires_active_job():
     with pytest.raises(RuntimeError):
-        shell("echo hi")
+        run("echo hi")
 
 
 def test_api_checkout_requires_active_job():
@@ -253,7 +253,7 @@ def test_api_checkout_requires_active_job():
 def test_api_shell_adds_step_and_returns_it():
     job = Job(name="build")
     with active_job(job):
-        step = shell("echo hi")
+        step = run("echo hi")
     assert step is job.steps[-1]
     assert step.command == "echo hi"
     # name should be empty string if not provided via API
@@ -264,8 +264,8 @@ def test_api_shell_adds_step_and_returns_it():
 def test_api_shell_with_name_and_empty_name_behavior():
     job = Job(name="build")
     with active_job(job):
-        s1 = shell("echo hi", name="Say hi")
-        s2 = shell("echo bye", name="")  # empty string
+        s1 = run("echo hi", name="Say hi")
+        s2 = run("echo bye", name="")  # empty string
     assert s1.to_github_dict() == {"name": "Say hi", "run": "echo hi"}
     # empty string should be omitted by to_github_dict (falsy)
     assert s2.to_github_dict() == {"run": "echo bye"}

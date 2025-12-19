@@ -22,15 +22,15 @@ The generated ``ci_pipeline.py`` includes a minimal working configuration:
 .. code-block:: python
 
    from pygha import job, default_pipeline
-   from pygha.steps import shell, checkout
+   from pygha.steps import run, checkout
 
    default_pipeline(on_push=["main"], on_pull_request=True)
 
    @job
    def build():
        checkout()
-       shell("pip install .")
-       shell("pytest")
+       run("pip install .")
+       run("pytest")
 
 **Options**
 
