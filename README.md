@@ -78,10 +78,7 @@ def test_matrix():
     checkout()
 
     # Use the matrix variable in your step arguments
-    uses(
-        "actions/setup-python@v5",
-        with_args={"python-version": "${{ matrix.python }}"}
-    )
+    setup_python("${{ matrix.python }}", cache="pip")
 
     run("pip install .[dev]")
     run("pytest")
@@ -90,7 +87,7 @@ def test_matrix():
 def deploy():
     """Build and publish if tests pass."""
     checkout()
-    uses("actions/setup-python@v5", with_args={"python-version": "3.11"})
+    setup_python("3.11", cache="pip")
 
     run("pip install build twine")
     run("python -m build")
