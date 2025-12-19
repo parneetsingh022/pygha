@@ -50,12 +50,6 @@ You can install `pygha` via pip:
 pip install pygha
 ```
 
-### Conda
-You can install pygha from the psidhu22 channel:
-```bash
-conda install -c psidhu22 pygha
-```
-
 
 ## Example: Define a CI Pipeline with `pygha`
 
