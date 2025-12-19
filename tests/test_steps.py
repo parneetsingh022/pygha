@@ -148,17 +148,17 @@ def test_to_yaml_pretty_and_key_order():
 ######################## Run run Step ######################
 
 
-def test_shell_basic_to_github_dict():
+def test_run_basic_to_github_dict():
     s = RunShellStep(command="pytest -v")
     assert s.to_github_dict() == {"run": "pytest -v"}
 
 
-def test_shell_named_to_github_dict():
+def test_run_named_to_github_dict():
     s = RunShellStep(command="pytest -v", name="Run tests")
     assert s.to_github_dict() == {"name": "Run tests", "run": "pytest -v"}
 
 
-def test_shell_execute_runs_subprocess(monkeypatch):
+def test_run_execute_runs_subprocess(monkeypatch):
     called = {}
 
     def fake_run(argv, **kwargs):
@@ -173,7 +173,7 @@ def test_shell_execute_runs_subprocess(monkeypatch):
     assert called["argv"] == ["echo", "hello"]
 
 
-def test_shell_execute_raises_on_failure(monkeypatch):
+def test_run_execute_raises_on_failure(monkeypatch):
     def fake_run(argv, **kwargs):
         raise subprocess.CalledProcessError(returncode=1, cmd=argv)
 
