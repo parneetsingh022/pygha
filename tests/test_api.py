@@ -1,9 +1,11 @@
 import pytest
 
-from pygha.steps import shell, checkout
+from pygha import registry, job
+from pygha.transpilers.github import GitHubTranspiler
+from pygha.steps import shell, checkout, setup_python
 from pygha.steps.api import active_job
 from pygha.models import Job
-from pygha.steps.builtin import RunShellStep, CheckoutStep
+from pygha.steps.builtin import RunShellStep, CheckoutStep, UsesStep
 
 
 def test_shell_appends_step_and_returns_it():
@@ -113,3 +115,52 @@ def test_nested_active_job_isolation():
     assert outer.steps[0] is s1
     assert outer.steps[1] is s3
     assert inner.steps[0] is s2
+
+
+def test_setup_python_basic():
+    """Verify basic setup-python step creation."""
+    job_obj = Job(name="test-job")
+    with active_job(job_obj):
+        step = setup_python("3.12")
+
+    assert isinstance(step, UsesStep)
+    assert step.action == "actions/setup-python@v5"
+    assert step.with_args == {"python-version": "3.12"}
+    assert step.name == "Setup Python"
+    assert job_obj.steps[0] is step
+
+
+def test_setup_python_with_cache_and_custom_name():
+    """Verify that cache and custom names are handled correctly."""
+    job_obj = Job(name="test-job")
+    with active_job(job_obj):
+        step = setup_python(
+            version="3.11", cache="pip", name="Install Python 3.11", action_version="v4"
+        )
+
+    expected_args = {"python-version": "3.11", "cache": "pip"}
+    assert step.action == "actions/setup-python@v4"
+    assert step.with_args == expected_args
+    assert step.name == "Install Python 3.11"
+
+
+def test_setup_python_fails_outside_job():
+    """Ensure the helper raises an error if no job is active."""
+    with pytest.raises(RuntimeError, match="No active job"):
+        setup_python("3.12")
+
+
+def test_setup_python_golden_yaml(assert_matches_golden):
+    """Verify the transpiled YAML output matches the expected format."""
+    registry.reset_registry()
+
+    @job(name="build")
+    def build_job():
+        setup_python("3.12", cache="pip")
+
+    # Get the default 'ci' pipeline
+    pipe = registry.get_default()
+    yaml_out = GitHubTranspiler(pipe).to_yaml()
+
+    # This will compare the output to a .yml file in your tests/golden/ directory
+    assert_matches_golden(yaml_out, "test_setup_python_helper.yml")

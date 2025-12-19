@@ -8,6 +8,7 @@ from .builtin import RunShellStep, CheckoutStep, UsesStep
 from pygha.models import Job, Step
 from pygha.expr import Expression
 
+
 _current_job: ContextVar[Job | None] = ContextVar("_current_job", default=None)
 _condition_stack: ContextVar[list[str]] = ContextVar("_condition_stack", default=[])
 
@@ -95,6 +96,19 @@ def uses(action: str, with_args: dict[str, Any] | None = None, name: str = "") -
     """
     job = _get_active_job("uses")
     step = UsesStep(action=action, with_args=with_args, name=name)
-    _apply_condition(step)  # <--- Apply condition
+    _apply_condition(step)
     job.add_step(step)
     return step
+
+
+def setup_python(
+    version: str, action_version: str = "v5", cache: str | None = None, name: str = "Setup Python"
+) -> Step:
+    with_args = {
+        "python-version": version,
+    }
+
+    if cache is not None:
+        with_args["cache"] = cache
+
+    return uses(f"actions/setup-python@{action_version}", with_args=with_args, name=name)
