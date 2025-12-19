@@ -1,4 +1,6 @@
 # api.py
+import warnings
+
 from contextlib import contextmanager
 from collections.abc import Generator
 from contextvars import ContextVar
@@ -64,12 +66,28 @@ def _get_active_job(name: str) -> Job:
     return job
 
 
-def shell(command: str, name: str = "") -> Step:
-    job = _get_active_job("shell")
+def run(command: str, name: str = "") -> Step:
+    """
+    Executes a shell command. Transpiles to a 'run:' block in GitHub Actions.
+    """
+    job = _get_active_job("run")
     step = RunShellStep(command=command, name=name)
     _apply_condition(step)
     job.add_step(step)
     return step
+
+
+def shell(command: str, name: str = "") -> Step:
+    """
+    .. deprecated:: 0.3.0
+       Use :func:`run` instead.
+    """
+    warnings.warn(
+        "'shell' is deprecated and will be removed in a future version. Use 'run' instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return run(command, name)
 
 
 def checkout(repository: str | None = None, ref: str | None = None, name: str = "") -> Step:
@@ -82,7 +100,7 @@ def checkout(repository: str | None = None, ref: str | None = None, name: str = 
 
 def echo(message: str, name: str = "") -> Step:
     command = f'echo "{message}"'
-    return shell(command, name=name)
+    return run(command, name=name)
 
 
 def uses(action: str, with_args: dict[str, Any] | None = None, name: str = "") -> Step:

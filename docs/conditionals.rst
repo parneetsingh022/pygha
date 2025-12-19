@@ -33,7 +33,7 @@ Any step added inside the block automatically inherits the condition.
 .. code-block:: python
 
    from pygha import job
-   from pygha.steps import shell, when, checkout
+   from pygha.steps import run, when, checkout
    from pygha.expr import runner
 
    @job
@@ -42,10 +42,10 @@ Any step added inside the block automatically inherits the condition.
 
        # Run specific setup only on Linux
        with when(runner.os == 'Linux'):
-           shell("sudo apt-get update")
-           shell("sudo apt-get install -y libpq-dev")
+           run("sudo apt-get update")
+           run("sudo apt-get install -y libpq-dev")
 
-       shell("make build")
+       run("make build")
 
 Nested Conditions
 ~~~~~~~~~~~~~~~~~
@@ -57,11 +57,11 @@ You can nest ``when`` blocks. pygha automatically combines them using the standa
    from pygha.expr import env
 
    with when(runner.os == 'Linux'):
-       shell("echo Linux")
+       run("echo Linux")
 
        with when(env.DEPLOY_TARGET == 'production'):
            # Condition: (runner.os == 'Linux') && (env.DEPLOY_TARGET == 'production')
-           shell("./deploy_prod.sh")
+           run("./deploy_prod.sh")
 
 Expression Builder
 ------------------
@@ -119,8 +119,8 @@ pygha exposes standard status check functions as helpers in ``pygha.expr``.
 
        # This step runs even if the work failed
        with when(always()):
-           shell("docker logout")
+           run("docker logout")
 
        # Send alert only on failure
        with when(failure()):
-           shell("./send_slack_alert.sh")
+           run("./send_slack_alert.sh")

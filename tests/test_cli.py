@@ -547,12 +547,12 @@ def test_init_creates_pipe_directory_and_pipeline_file(tmp_path, capsys):
 
     content = pipeline_file.read_text(encoding="utf-8")
     assert "from pygha import job, default_pipeline" in content
-    assert "from pygha.steps import shell, checkout" in content
+    assert "from pygha.steps import run, checkout" in content
     assert "@job" in content
     assert "def build():" in content
-    assert 'checkout()' in content
-    assert 'shell("pip install .")' in content
-    assert 'shell("pytest")' in content
+    assert "checkout()" in content
+    assert 'run("pip install .")' in content
+    assert 'run("pytest")' in content
 
     # Check success message
     out = capsys.readouterr().out

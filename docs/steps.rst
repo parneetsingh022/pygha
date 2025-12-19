@@ -9,7 +9,7 @@ appends a concrete :class:`pygha.models.Step` implementation to it.
 Builtin helpers
 ------------------
 
-``shell(command, name="")``
+``run(command, name="")``
    Wraps :class:`pygha.steps.builtin.RunShellStep`.  The command is split
    with :mod:`shlex` and executed with ``subprocess.run`` when the
    pipeline is executed locally.
@@ -27,7 +27,7 @@ Builtin helpers
    The ``with_args`` dictionary is transpiled to the ``with:`` block in YAML.
 
 ``echo(message, name="")``
-   Convenience wrapper that calls :func:`shell` with
+   Convenience wrapper that calls :func:`run` with
    ``echo "message"`` for quick debugging statements.
 
 ``setup_python(version, action_version="v5", cache=None, name="Setup Python")``
@@ -44,7 +44,7 @@ Example job
 .. code-block:: python
 
    from pygha.decorators import job
-   from pygha.steps import shell, checkout, echo, uses
+   from pygha.steps import run, checkout, echo, uses
 
    @job(name="quality", depends_on=["build"], runs_on="ubuntu-latest")
    def lint_and_test():
@@ -53,9 +53,9 @@ Example job
        setup_python("3.12", cache="pip")
 
        echo("Installing dependencies")
-       shell("pip install -r requirements.txt", name="install")
-       shell("ruff check", name="lint")
-       shell("pytest -q", name="tests")
+       run("pip install -r requirements.txt", name="install")
+       run("ruff check", name="lint")
+       run("pytest -q", name="tests")
 
 Custom steps
 ---------------

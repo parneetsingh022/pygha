@@ -3,7 +3,7 @@ from pygha.models import Job
 from pygha.decorators import job
 from pygha.transpilers.github import GitHubTranspiler
 from pygha.registry import reset_registry, register_pipeline
-from pygha.steps import shell
+from pygha.steps import run
 from pygha.models import Pipeline
 
 # --- 1. Model Tests ---
@@ -126,7 +126,7 @@ def test_matrix_os_expansion(assert_matches_golden):
     )
     def os_job():
         # Verify we can use it in a step too
-        shell('echo "Running on ${{ matrix.os }}"')
+        run('echo "Running on ${{ matrix.os }}"')
 
     pipe = register_pipeline("ci")
     tr = GitHubTranspiler(pipe)
