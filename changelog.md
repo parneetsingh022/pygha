@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Job Timeout**: Added `timeout_minutes` parameter to the `@job` decorator to set the maximum runtime for a job. If not specified, defaults to the platform's default (360 minutes for GitHub Actions). (@majiayu000 in [#48])
 - **CLI**: Added `pygha init` command to scaffold a new pygha project. Creates a `.pipe` directory with a sample `ci_pipeline.py` file containing a minimal working pipeline configuration. Supports `--src-dir` option to customize the target directory. (@majiayu000 in [#47])
+- **CLI**: Added a global `--version` flag to the pygha CLI. Running `pygha --version` outputs the current installed version (e.g., pygha 0.2.1). A test was added to verify its functionality.
 - **setup_python**: Added `setup_python()` helper to `pygha.steps` for easy Python environment configuration with built-in cache support. ([#50])
 
 ### Changed
