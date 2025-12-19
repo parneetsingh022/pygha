@@ -4,6 +4,8 @@ import stat
 import runpy
 from pathlib import Path
 from re import Pattern
+from pygha import __version__
+
 
 from pygha.transpilers.github import GitHubTranspiler
 from pygha import registry
@@ -156,6 +158,12 @@ def main(argv: list[str] | None = None) -> int:
     import argparse
 
     parser = argparse.ArgumentParser(prog="pygha", description="pygha CLI")
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"pygha {__version__}",
+    )
+
     sub = parser.add_subparsers(dest="command", required=True)
 
     # Init subcommand

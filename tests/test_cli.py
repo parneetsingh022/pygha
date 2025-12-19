@@ -3,7 +3,8 @@ from pathlib import Path
 import pytest
 from types import SimpleNamespace
 import runpy
-
+import subprocess
+import sys
 
 from pygha import registry
 from pygha.cli import main as cli_main
@@ -656,3 +657,14 @@ def test_main_dispatches_to_cmd_init(monkeypatch, tmp_path):
 
     assert rc == 42
     assert called == {"src_dir": str(tmp_path / "custom")}
+
+
+def test_cli_version():
+    result = subprocess.run(
+        [sys.executable, "-m", "pygha", "--version"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    assert "pygha" in result.stdout
