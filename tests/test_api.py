@@ -2,7 +2,7 @@ import pytest
 
 from pygha import registry, job
 from pygha.transpilers.github import GitHubTranspiler
-from pygha.steps import run, checkout, setup_python
+from pygha.steps import run, checkout, setup_python, shell
 from pygha.steps.api import active_job
 from pygha.models import Job
 from pygha.steps.builtin import RunShellStep, CheckoutStep, UsesStep
@@ -164,3 +164,13 @@ def test_setup_python_golden_yaml(assert_matches_golden):
 
     # This will compare the output to a .yml file in your tests/golden/ directory
     assert_matches_golden(yaml_out, "test_setup_python_helper.yml")
+
+
+def test_shell_deprecation_warning():
+    """Verify that calling shell() triggers a DeprecationWarning."""
+    job = Job(name="test")
+
+    with active_job(job):
+        # This context manager captures warnings of the specified type
+        with pytest.warns(DeprecationWarning, match="Use 'run' instead"):
+            shell("echo 'testing deprecation'")
