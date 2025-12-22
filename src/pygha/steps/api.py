@@ -84,7 +84,7 @@ def shell(command: str, name: str = "") -> Step:
     """
     warnings.warn(
         "'shell' is deprecated and will be removed in a future version. Use 'run' instead.",
-        DeprecationWarning,
+        FutureWarning,
         stacklevel=2,
     )
     return run(command, name)
