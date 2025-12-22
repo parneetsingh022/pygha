@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2025-12-22
+
+### Fixed
+- **Deprecation Warning**: Switched the `shell()` deprecation warning from `DeprecationWarning` to `FutureWarning` to ensure it is visible to end-users by default without requiring environment flags. ([#71])
+
+[#71]: https://github.com/parneetsingh022/pygha/issues/71
+
 ## [0.3.0] - 2025-12-19
 
 ### Added
