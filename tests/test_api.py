@@ -172,5 +172,5 @@ def test_shell_deprecation_warning():
 
     with active_job(job):
         # This context manager captures warnings of the specified type
-        with pytest.warns(FutureWarning, match="Use 'run' instead"):
+        with pytest.warns(DeprecationWarning, match="Use 'run' instead"):
             shell("echo 'testing deprecation'")
