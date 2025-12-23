@@ -132,13 +132,13 @@ In this example, the ``test`` job runs three times, once for each Python version
 
 .. code-block:: python
 
-   from pygha import job
-   from pygha.steps import run
+   from pygha import job, matrix
+   from pygha.steps import echo
 
    @job(matrix={"python": ["3.11", "3.12", "3.13"]})
    def test():
        # Access the matrix context in your shell commands
-       run("echo Running tests on Python ${{ matrix.python }}")
+       echo(f"Running tests on Python { matrix.python }")
 
 Dynamic Runners (OS Matrix)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -150,11 +150,11 @@ for cross-platform testing.
 
    @job(
        name="build",
-       runs_on="${{ matrix.os }}",
+       runs_on=matrix.os,
        matrix={"os": ["ubuntu-latest", "macos-latest", "windows-latest"]}
    )
    def build_os():
-       run("echo Building on ${{ matrix.os }}")
+       run(f"echo Building on { matrix.os }")
 
 Fail Fast
 ~~~~~~~~~
@@ -169,7 +169,7 @@ To let all jobs finish regardless of failure, set ``fail_fast=False``.
        fail_fast=False
    )
    def long_running_test():
-       run("./run_tests.sh --shard ${{ matrix.shard }}")
+       run(f"./run_tests.sh --shard { matrix.shard }")
 
 Job Timeout
 ~~~~~~~~~~~
