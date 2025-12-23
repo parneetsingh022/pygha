@@ -57,7 +57,7 @@ Below is an example of a **Python-defined pipeline** that mirrors what most team
 build, lint, test, coverage, and deploy — all orchestrated through `pygha`.
 
 ```python
-from pygha import job, default_pipeline
+from pygha import job, default_pipeline, matrix
 from pygha.steps import run, checkout, uses
 
 # Configure the default pipeline to run on main push and PRs
@@ -72,7 +72,7 @@ def test_matrix():
     checkout()
 
     # Use the matrix variable in your step arguments
-    setup_python("${{ matrix.python }}", cache="pip")
+    setup_python(matrix.python, cache="pip")
 
     run("pip install .[dev]")
     run("pytest")

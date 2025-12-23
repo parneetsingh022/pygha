@@ -55,3 +55,23 @@ def success() -> Expression:
 
 def failure() -> Expression:
     return Expression("failure()")
+
+
+class MatrixProxy:
+    def __getattr__(self, name: str) -> str:
+        # Dot notation: "Magic" convenience for standard GHA keys.
+        # Python forces us to use underscores (matrix.python_version),
+        # so we automatically convert them to hyphens for GHA.
+        # matrix.python_version -> ${{ matrix.python-version }}
+        gha_name = name.replace("_", "-")
+        return f"${{{{ matrix.{gha_name} }}}}"
+
+    def __getitem__(self, name: str) -> str:
+        # Bracket notation: "Strict" mode.
+        # Used when the user specifically needs an underscore or special char.
+        # matrix['python_version'] -> ${{ matrix.python_version }}
+        # matrix['python-version'] -> ${{ matrix.python-version }}
+        return f"${{{{ matrix.{name} }}}}"
+
+
+matrix = MatrixProxy()
