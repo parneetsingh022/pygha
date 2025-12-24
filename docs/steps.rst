@@ -44,7 +44,7 @@ Example job
 .. code-block:: python
 
    from pygha.decorators import job
-   from pygha.steps import run, checkout, echo, uses
+   from pygha.steps import run, checkout, echo, uses, setup_python
 
    @job(name="quality", depends_on=["build"], runs_on="ubuntu-latest")
    def lint_and_test():
